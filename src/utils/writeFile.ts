@@ -11,4 +11,6 @@ const writeJSONToFile = (data: string, fileName: string) => {
   });
 };
 
-export default writeJSONToFile;
+export const JsonifyToFile = (data: any, fileName: string) => {
+  writeJSONToFile(JSON.stringify(data, null, 2), fileName);
+};
