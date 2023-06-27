@@ -61,6 +61,13 @@ export type Listing = {
   opening_hours?: {};
   amenities?: {};
   media?: {};
+
+  available_for_purchase: boolean;
+  request_based_booking: boolean;
+  auto_cancel_booking_duration: number | null;
+  category_tags: CategoryTag[];
+
+  enabled: boolean;
 };
 
 export type Rate = {
@@ -86,6 +93,20 @@ export type Location = {
 };
 
 export type Amenity = (typeof AMENITIES)[keyof typeof AMENITIES];
+
+export const CategoryTag: Record<string, string> = {
+  "Hot Desk": "hotdesk",
+  Meeting: "meeting",
+  Studio: "studio",
+  Dance: "dance",
+  Photography: "photography",
+  Event: "event",
+  Art: "art",
+  Music: "music",
+  Workshop: "workshop",
+  Cafe: "cafe",
+  Others: "others",
+};
 
 export type StaytionObject = {
   brands: Brand[];

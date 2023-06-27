@@ -97,6 +97,13 @@ export const createListing = async (
     outlet_id: outlet.id,
 
     name: listingName,
+
+    available_for_purchase: true,
+    request_based_booking: true,
+    auto_cancel_booking_duration: 5,
+    category_tags: [], // TODO
+
+    enabled: true,
   };
 };
 
