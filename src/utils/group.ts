@@ -86,25 +86,25 @@ export const groupSplitHyphen = (
   return allSpaces;
 };
 
-export const groupRest = (
-  spaces: Space[],
-  listings: Record<string, Space[]>
-) => {
-  let allSpaces = spaces.filter(
-    (space) =>
-      space.name.toLowerCase().startsWith("s") ||
-      space.name.toLowerCase().startsWith("t") ||
-      space.name.toLowerCase().startsWith("w")
-  );
+// export const groupRest = (
+//   spaces: Space[],
+//   listings: Record<string, Space[]>
+// ) => {
+//   let allSpaces = spaces.filter(
+//     (space) =>
+//       space.name.toLowerCase().startsWith("s") ||
+//       space.name.toLowerCase().startsWith("t") ||
+//       space.name.toLowerCase().startsWith("w")
+//   );
 
-  // console.log(allSpaces.map(item => item.name))
-  const brands = new Trie();
-  // allSpaces.forEach((space) => brands.addSpace(space));
-  brands.addSpaces(allSpaces);
-  brands.print();
+//   // console.log(allSpaces.map(item => item.name))
+//   const brands = new Trie();
+//   // allSpaces.forEach((space) => brands.addSpace(space));
+//   brands.addSpaces(allSpaces);
+//   brands.print();
 
-  return allSpaces;
-};
+//   return allSpaces;
+// };
 
 const getMaxItem = <T>(arr: T[], fn: (item: T) => any) =>
   arr.reduce((prev, curr) => (fn(prev) > fn(curr) ? prev : curr));
