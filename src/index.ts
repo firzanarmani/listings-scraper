@@ -1,3 +1,4 @@
+import { inject } from "./injector";
 import parse from "./parser";
 import scrape from "./scraper";
 import { ListingsProvider } from "./types/constants";
@@ -9,9 +10,10 @@ const run = async (provider: ListingsProvider, cityCode: string) => {
     // console.log(listings.length);
 
     // Parser - Convert JSON data into properly formatted data object
-    await parse(provider, cityCode, listings);
+    const data = await parse(provider, cityCode, listings);
 
-    // Injector - Push the data object into database and test
+    // Injector - Push the data object into database
+    await inject(data);
   } catch (err) {
     console.log(err);
   }

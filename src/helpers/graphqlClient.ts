@@ -1,4 +1,7 @@
 import { GraphQLClient } from "graphql-request";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 const hasuraEndPoint = process.env.HASURA_ENDPOINT_URL || "";
 
