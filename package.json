@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "",
   "scripts": {
+    "start": "ts-node src/index.ts",
     "lint": "eslint --ignore-path .gitignore --ext .js,.ts .",
     "format": "prettier --ignore-path .gitignore --write '**/*.+(js|ts|json)'"
   },
@@ -10,14 +11,27 @@
   "author": "Firzan Armani",
   "license": "ISC",
   "devDependencies": {
+    "@types/nanoid-dictionary": "^4.2.0",
+    "@types/uuid": "^9.0.2",
     "@typescript-eslint/eslint-plugin": "^5.59.8",
     "@typescript-eslint/parser": "^5.59.8",
+    "dotenv": "^16.3.1",
     "eslint": "^8.41.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.0.0",
     "eslint-config-prettier": "^8.8.0",
     "eslint-plugin-import": "^2.27.5",
     "prettier": "^2.8.8",
+    "ts-node": "^10.9.1",
     "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "graphql": "^16.7.1",
+    "graphql-request": "^6.1.0",
+    "nanoid": "^3.3.6",
+    "nanoid-dictionary": "^4.3.0",
+    "puppeteer": "^20.5.0",
+    "slugify": "^1.6.6",
+    "uuid": "^9.0.0"
   }
 }
