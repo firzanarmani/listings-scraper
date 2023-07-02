@@ -5,11 +5,16 @@ export type Brand = {
   slug: string;
 
   name: string;
-  description?: string | null;
-  website?: string;
+  description: string;
+  website: string;
 
-  enabled?: boolean | null;
-  verified?: boolean | null;
+  platform_fee_percentage: number | null;
+  fixed_fee_per_transactions: number | null;
+  membership_fee_per_transaction: number | null;
+
+  enabled: boolean;
+  verified: boolean;
+  claimable: boolean;
 };
 
 export type Outlet = {
@@ -18,7 +23,7 @@ export type Outlet = {
   brand_id: string;
 
   name: string;
-  description?: string;
+  description: string;
 
   full_address: string;
   city_code: string; // THA/bangkok
@@ -28,26 +33,18 @@ export type Outlet = {
   currency_code: string;
   timezone_gmt: string;
 
-  opening_hours?: {
-    monday?: {};
-    tuesday?: {};
-    wednesday?: {};
-    thursday?: {};
-    friday?: {};
-    saturday?: {};
-    sunday?: {};
-  };
+  opening_hours: OpeningHours | null;
   amenities: Amenity[];
-  media?: {};
+  media: Media[];
 
-  customer_support_email?: string | null;
-  default_email?: string | null;
+  customer_support_email: string;
+  default_email: string[];
 
-  fixed_fee_per_transaction?: any | null;
-  membership_fee_per_transaction?: any | null;
-  platform_fee_percentage?: any | null;
+  platform_fee_percentage: number | null;
+  fixed_fee_per_transaction: number | null;
+  membership_fee_per_transaction: number | null;
 
-  enabled?: boolean | null;
+  enabled: boolean;
 };
 
 export type Listing = {
@@ -56,11 +53,11 @@ export type Listing = {
   outlet_id: string;
 
   name: string;
-  description?: string;
+  description: string;
 
-  opening_hours?: {};
-  amenities?: {};
-  media?: {};
+  opening_hours: OpeningHours | null;
+  amenities: Amenity[];
+  media: Media[];
 
   available_for_purchase: boolean;
   request_based_booking: boolean;
@@ -76,9 +73,9 @@ export type Rate = {
   outlet_id: string;
 
   mode: "hour" | "day" | "quote";
-  price?: any | null;
-  price_per_additional_pax?: any | null;
-  max_pax?: number | null;
+  price: number | null;
+  price_per_additional_pax: number | null;
+  max_pax: number | null;
 };
 
 export type Location = {
@@ -94,18 +91,29 @@ export type Location = {
 
 export type Amenity = (typeof AMENITIES)[keyof typeof AMENITIES];
 
-export const CategoryTag: Record<string, string> = {
-  "Hot Desk": "hotdesk",
-  Meeting: "meeting",
-  Studio: "studio",
-  Dance: "dance",
-  Photography: "photography",
-  Event: "event",
-  Art: "art",
-  Music: "music",
-  Workshop: "workshop",
-  Cafe: "cafe",
-  Others: "others",
+export type OpeningHourDay = {
+  sets: {
+    open: string;
+    close: string;
+  }[];
+  active: boolean;
+};
+
+export type OpeningHours = {
+  monday?: OpeningHourDay;
+  tuesday?: OpeningHourDay;
+  wednesday?: OpeningHourDay;
+  thursday?: OpeningHourDay;
+  friday?: OpeningHourDay;
+  saturday?: OpeningHourDay;
+  sunday?: OpeningHourDay;
+};
+
+export type Media = {
+  url: string;
+  type: string;
+  public: boolean;
+  ref_id?: string | null;
 };
 
 export type StaytionObject = {

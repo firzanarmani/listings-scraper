@@ -1,4 +1,4 @@
-const chunkArray = (array: string[], chunk_size: number = 10): string[][] =>
+const chunkArray = <T>(array: T[], chunk_size: number = 10): T[][] =>
   Array<string>(Math.ceil(array.length / chunk_size))
     .fill("")
     .map((_, index) => index * chunk_size)

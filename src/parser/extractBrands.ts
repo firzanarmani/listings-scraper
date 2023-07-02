@@ -1,4 +1,4 @@
-import { Space } from "../types/coworker";
+import { CompleteSpace } from "../types/coworker";
 import {
   groupDuplicates,
   // groupRest,
@@ -6,8 +6,9 @@ import {
   groupSplitHyphen,
   removeSameLinks,
 } from "../utils/group";
+// import { JsonifyToFile } from "../utils/writeFile";
 
-const extractBrands = (spaces: Space[]) => {
+const extractBrands = (spaces: CompleteSpace[]) => {
   let allSpaces = spaces;
 
   allSpaces = allSpaces.sort((a, b) => {
@@ -16,7 +17,7 @@ const extractBrands = (spaces: Space[]) => {
     return 0;
   });
 
-  const listings: Record<string, Space[]> = {};
+  const listings: Record<string, CompleteSpace[]> = {};
 
   allSpaces = removeSameLinks(allSpaces);
 
@@ -26,9 +27,23 @@ const extractBrands = (spaces: Space[]) => {
 
   allSpaces = groupSplitHyphen(allSpaces, listings);
 
-  console.log(Object.values(listings).flat().length);
-  // console.log(allSpaces.length);
-  // allSpaces = groupRest(allSpaces, listings)
+  // allSpaces = allSpaces.filter((word) =>
+  //   word.name.toLowerCase().startsWith("t")
+  // );
+  // JsonifyToFile(
+  //   allSpaces.map((item) => item.name),
+  //   "rest"
+  // );
+  // groupRest(allSpaces, listings);
+  // console.log(Object.values(listings).flat().length);
+  // JsonifyToFile(listings, "test");
+
+  // Naively add everything else
+  allSpaces.forEach((space) => {
+    listings[space.name] = [space];
+  });
+
+  console.log(Object.values(listings).length);
 
   return listings;
 };

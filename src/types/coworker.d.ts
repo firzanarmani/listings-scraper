@@ -1,3 +1,11 @@
+export type CompleteSpace = Space & {
+  operatingHours: {
+    weekday: { open: string; close: string } | null;
+    saturday: { open: string; close: string } | null;
+    sunday: { open: string; close: string } | null;
+  };
+};
+
 // Generated with QuickType.io
 export type Data = {
   spaces: Space[];

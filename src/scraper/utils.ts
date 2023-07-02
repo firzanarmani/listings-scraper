@@ -9,6 +9,17 @@ import { CITIES } from "../constants";
 
 const openPage = async (browser: Browser, url: string): Promise<Page> => {
   const page = await browser.newPage();
+
+  // Block images (to cut down loading time)
+  await page.setRequestInterception(true);
+  page.on("request", (req) => {
+    if (req.resourceType() === "image") {
+      req.abort();
+    } else {
+      req.continue();
+    }
+  });
+
   await page.goto(url, { waitUntil: "load" });
 
   return page;
@@ -36,14 +47,13 @@ const createLink = (
 const getItem = async <Selector extends string>(
   page: Page,
   selector: Selector
-): Promise<ElementHandle<NodeFor<Selector>>> => {
-  const item = await page.waitForSelector<Selector>(selector, {
-    visible: true,
-  });
-
-  if (!item) {
-    throw Error(`Selector '${selector}' not found`);
-  }
+): Promise<ElementHandle<NodeFor<Selector>> | null> => {
+  const item = await page
+    .waitForSelector<Selector>(selector, {
+      visible: true,
+      timeout: 1000,
+    })
+    .catch((err) => null);
 
   return item;
 };
@@ -54,7 +64,7 @@ const clickOnItem = async <Selector extends string>(
 ): Promise<void> => {
   const item = await getItem(page, selector);
 
-  await item.click();
+  await item?.click();
 };
 
 const typeInItem = async <Selector extends string>(
@@ -64,8 +74,8 @@ const typeInItem = async <Selector extends string>(
 ): Promise<void> => {
   const item = await getItem(page, selector);
 
-  await item.type(input, { delay: 100 });
-  await item.press("Enter");
+  await item?.type(input, { delay: 100 });
+  await item?.press("Enter");
 };
 
 export { openPage, createLink, getItem, clickOnItem, typeInItem };

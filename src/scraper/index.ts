@@ -1,12 +1,22 @@
+/* eslint-disable no-await-in-loop */
+/* eslint-disable no-restricted-syntax */
 import { Browser, launch } from "puppeteer";
 import { createLink } from "./utils";
 import { ListingsProvider } from "../types/constants";
+import { AVOID_BRAND_NAMES } from "../constants";
+import extractBrands from "../parser/extractBrands";
+import { parseCityCode } from "../parser/utils";
+import { CompleteSpace, Space } from "../types/coworker";
+import chunkArray from "../utils/chunk";
+import { scrapeCoworkerListing } from "./coworker";
 
 const fetch = async (browser: Browser, url: string): Promise<any> => {
   const page = await browser.newPage();
   const data = await page.goto(url, { waitUntil: "load" });
 
   const result = await data?.json();
+
+  await page.close();
 
   return result;
 };
@@ -16,6 +26,7 @@ const scrape = async (provider: ListingsProvider, cityCode: string) => {
 
   const browser = await launch({
     headless: "new",
+    // headless: false,
   });
 
   /* On first run, get the pagination information */
@@ -44,9 +55,36 @@ const scrape = async (provider: ListingsProvider, cityCode: string) => {
   );
   listings.push(...data.flat());
 
+  // Filter results
+  const { city } = parseCityCode(cityCode);
+
+  const filteredListings = (listings as Space[])
+    .filter((space) => space.location.city_name.toLowerCase() === city)
+    .filter((space) => {
+      for (const brand of AVOID_BRAND_NAMES) {
+        if (space.name.toLowerCase().startsWith(brand.toLowerCase()))
+          return false;
+      }
+      return true;
+    });
+
+  const listingsChunks = chunkArray(filteredListings, 20);
+
+  const newListings: CompleteSpace[] = [];
+
+  for (const chunk of listingsChunks) {
+    const updatedChunks = await Promise.all(
+      chunk.map((listing) => scrapeCoworkerListing(browser, listing))
+    );
+
+    newListings.push(...updatedChunks.flat());
+  }
+
   await browser.close();
 
-  return listings;
+  const brandsWithListings = extractBrands(newListings);
+
+  return brandsWithListings;
 };
 
 export default scrape;

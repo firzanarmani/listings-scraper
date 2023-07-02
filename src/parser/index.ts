@@ -1,12 +1,12 @@
 import { ListingsProvider } from "../types/constants";
 import { StaytionObject } from "../types/staytion";
-// import writeJSONToFile from "../utils/writeFile";
+// import { JsonifyToFile } from "../utils/writeFile";
 import { parseCoworkerData } from "./coworker";
 
 const parse = async (
   provider: ListingsProvider,
   cityCode: string,
-  rawListings: any[]
+  listings: Record<string, any[]>
 ) => {
   let parsedStaytionObj: StaytionObject = {
     brands: [],
@@ -17,7 +17,7 @@ const parse = async (
 
   switch (provider) {
     case "coworker":
-      parsedStaytionObj = await parseCoworkerData(cityCode, rawListings);
+      parsedStaytionObj = await parseCoworkerData(cityCode, listings);
       break;
     case "allospaces":
       break;
@@ -26,6 +26,7 @@ const parse = async (
   }
 
   // writeJSONToFile(JSON.stringify(parsedStaytionObj, null, 2), "parsed");
+  // JsonifyToFile(parsedStaytionObj, "test1");
 
   return parsedStaytionObj;
 };
