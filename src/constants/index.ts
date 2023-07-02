@@ -109,61 +109,34 @@ export const AMENITIES: Record<string, string> = {
   WHITEBOARD: "whiteboard",
 } as const;
 
-// FIXME INCORRECT
-export const COWORKER_AMENITIES: Record<
-  string,
-  (typeof AMENITIES)[keyof typeof AMENITIES]
-> = {
+export const COWORKER_AMENITIES: Record<string, string> = {
   "1": AMENITIES.WIFI,
-  "2": AMENITIES.AIR_CONDITIONING,
-  "3": AMENITIES.HEATING,
-  // 4: standing desks
-  // 5: bean bags
-  // 6: ergonomic chairs
-  // 7: bosu ball chairs
-  // 8: hammocks
-  // 9: events
-  // 10: community lunches
-  // 11: community drinks
-  // 12: facebook group for members
-  // 13: accelerator programs
-  // 14: community app
-  // 15: incubator programs
-  // 16: mentorship programs
-  // 17: pitching events
-  // 18: slack channel for members
-  // 19: toastmasters
-  // 20: dual/single monitors
-  // 21: sound recording equipment
-  // 22: video recording equipment
-  "23": AMENITIES.PRINTER,
-  // 24: scanner
-  // 25: photocopier
-  // 26: 3d printer
-  "27": AMENITIES.COMPUTER, // PCs
-  "28": AMENITIES.COMPUTER, // Macs
-  // 29: Apple tv
-  // 30: AR equipment
-  // 31: chromecast
-  // 32: drone
-  // 33: green screen
-  // 34: microphone
-  // 35: photo studio
-  // 36: professional lighting equipment
-  "37": AMENITIES.PROJECTOR,
-  // 38: recording studio
-  // 39: screen printer
-  "40": AMENITIES.LOUNGE_AREA,
-  // 41: outdoor terrace
-  "42": AMENITIES.SWIMMING_POOL,
-  // 43: meditation room
-  // 44: nap room
-  // 45: yoga studio
-  // 46: kitchen
-  // 47: podcasting room
-  // 48: co-living accommodation
-  "49": AMENITIES.PHONE_BOOTH,
-  // 50: childcare
+  "2": AMENITIES.LOUNGE_AREA,
+  "4": AMENITIES.AIR_CONDITIONING,
+  "5": AMENITIES.HEATING,
+  "6": AMENITIES.COOKING_FACILITIES,
+  "8": AMENITIES.DESKS, // Standing desks
+  "11": AMENITIES.CHAIRS, // Beanbags
+  "13": AMENITIES.SWIMMING_POOL,
+  "14": AMENITIES.PARKING,
+  "15": AMENITIES.WHEELCHAIR,
+  "18": AMENITIES.CHAIRS, // Ergonomic chairs
+  "32": AMENITIES.PRINTER,
+  "37": AMENITIES.TWENTY_FOUR_SEVEN_ACCESS,
+  "39": AMENITIES.PETS_ALLOWED,
+  "40": AMENITIES.COMPUTER,
+  "41": AMENITIES.COMPUTER,
+  "42": AMENITIES.LOCKER,
+  "46": AMENITIES.SHOWER_FACILITIES,
+  "54": AMENITIES.BIKE_RACK,
+  "55": AMENITIES.BIKE_RACK,
+  "58": AMENITIES.CHAIRS, // Bosu ball chairs
+  "73": AMENITIES.KARAOKE,
+  "74": AMENITIES.WASHING_MACHINE, // Laundry service
+  "78": AMENITIES.SOUND_SYSTEM,
+  "79": AMENITIES.SLEEPING_PODS, // Nap room
+  "85": AMENITIES.PHONE_BOOTH,
+  "90": AMENITIES.PROJECTOR,
 } as const;
 
 export const COWORKER_RESOURCES: Record<CoworkerResources, string> = {
@@ -173,8 +146,35 @@ export const COWORKER_RESOURCES: Record<CoworkerResources, string> = {
   meeting_room: "Meeting Room",
 };
 
+export const CATEGORY_TAGS: Record<CategoryTags, string> = {
+  "Hot Desk": "hotdesk",
+  Meeting: "meeting",
+  Studio: "studio",
+  Dance: "dance",
+  Photography: "photography",
+  Event: "event",
+  Art: "art",
+  Music: "music",
+  Workshop: "workshop",
+  Cafe: "cafe",
+  Others: "others",
+};
+
 export type CoworkerResources =
   | "hot_desk"
   | "dedicated_desk"
   | "private_office"
   | "meeting_room";
+
+export type CategoryTags =
+  | "Hot Desk"
+  | "Meeting"
+  | "Studio"
+  | "Dance"
+  | "Photography"
+  | "Event"
+  | "Art"
+  | "Music"
+  | "Workshop"
+  | "Cafe"
+  | "Others";
