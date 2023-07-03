@@ -99,7 +99,7 @@ export const parseCoworkerData = async (
         outletListings.push({ ...listing, rates: [rate] });
       }
 
-      if (space.list_pricing.meeting_room) {
+      for (const meetingRoom of space.meetingRooms) {
         const listing = await createListing(
           outlet,
           meetingRoom.name,

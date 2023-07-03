@@ -55,9 +55,9 @@ const scrape = async (provider: ListingsProvider, cityCode: string) => {
   );
   listings.push(...data.flat());
 
-  // Filter results
   const { city } = parseCityCode(cityCode);
 
+  // Filter results
   const filteredListings = (listings as Space[])
     .filter((space) => space.location.city_name.toLowerCase() === city)
     .filter((space) => {
@@ -68,10 +68,9 @@ const scrape = async (provider: ListingsProvider, cityCode: string) => {
       return true;
     });
 
-  const listingsChunks = chunkArray(filteredListings, 20);
-
   const newListings: CompleteSpace[] = [];
 
+  const listingsChunks = chunkArray(filteredListings, 20);
   for (const chunk of listingsChunks) {
     const updatedChunks = await Promise.all(
       chunk.map((listing) => scrapeCoworkerListing(browser, listing))

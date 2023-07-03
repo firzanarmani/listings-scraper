@@ -11,15 +11,14 @@ const openPage = async (browser: Browser, url: string): Promise<Page> => {
   const page = await browser.newPage();
 
   // Block images (to cut down loading time)
-  // TODO Temporarily disabled since it's affecting loading of some listings with meetng rooms, like Spaces Works Empire Tower
-  // await page.setRequestInterception(true);
-  // page.on("request", (req) => {
-  //   if (req.resourceType() === "image") {
-  //     req.abort();
-  //   } else {
-  //     req.continue();
-  //   }
-  // });
+  await page.setRequestInterception(true);
+  page.on("request", (req) => {
+    if (req.resourceType() === "image") {
+      req.abort();
+    } else {
+      req.continue();
+    }
+  });
 
   await page.goto(url, { waitUntil: "load" });
 
@@ -44,7 +43,6 @@ const createLink = (
   }
 };
 
-// TODO Can I somehow use ReturnType?
 const getItem = async <Selector extends string>(
   page: Page,
   selector: Selector

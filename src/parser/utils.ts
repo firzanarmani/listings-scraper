@@ -142,7 +142,7 @@ export const createOutlet = async (
       space.descriptions.find((desc) => desc.language === "English")
         ?.text_full ?? "",
 
-    full_address: `${space.location.address_1.trim()}, ${space.location.address_2.trim()}`,
+    full_address: `${space.location.address_1.trim()} ${space.location.address_2.trim()}`,
     city_area_code: null,
     city_code: cityCode,
     country_code: country,
