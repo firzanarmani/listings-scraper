@@ -3,7 +3,7 @@ import { toPascalCasePhrase } from "./toPascalCase";
 import { CompleteSpace } from "../types/coworker";
 import { isSimilarStrings } from "./isSimilarStrings";
 
-const groupBy = <T>(arr: T[], fn: (item: T) => any) =>
+export const groupBy = <T>(arr: T[], fn: (item: T) => any) =>
   arr.reduce<Record<string, T[]>>((prev, curr) => {
     const groupKey = fn(curr);
     const group = prev[groupKey] || [];

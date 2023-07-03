@@ -1,6 +1,7 @@
 import { Browser } from "puppeteer";
 import { CompleteSpace, Space } from "../types/coworker";
 import { openPage } from "./utils";
+import { removeTrailingChar } from "../utils/removeTrailingChar";
 
 const convertTimeSimple = (time: string, isAm: boolean) => {
   if (isAm) return time;
@@ -61,7 +62,35 @@ export const scrapeCoworkerListing = async (
       saturday = hoursContainer.item(1).textContent;
       sunday = hoursContainer.item(2).textContent;
     }
+
     return { weekday, saturday, sunday };
+  });
+
+  // Get meeting rooms
+  const meetingRooms = await page.evaluate(() => {
+    const result = [];
+
+    const meetingRoomElements = document.querySelectorAll<HTMLDivElement>(
+      "div#meeting-rooms div.slick-slide:not(.slick-cloned)"
+    );
+    // eslint-disable-next-line no-restricted-syntax
+    for (const meetingRoom of meetingRoomElements) {
+      const name =
+        meetingRoom.querySelector<HTMLHeadingElement>("h5")?.innerText ||
+        "Meeting Room";
+      const image = meetingRoom.querySelector<HTMLImageElement>("img")?.src;
+      const pax =
+        meetingRoom
+          .querySelector<HTMLDivElement>(".space-meetingroom-quantity")
+          ?.innerText.split(" ")[0] || "";
+      const price =
+        meetingRoom.querySelector<HTMLDivElement>(".space-meetingroom-price")
+          ?.innerText || "";
+
+      result.push({ name, image, pax, price });
+    }
+
+    return result;
   });
 
   const extractedHours = {
@@ -75,5 +104,11 @@ export const scrapeCoworkerListing = async (
   return {
     ...listing,
     operatingHours: extractedHours,
+    meetingRooms: meetingRooms.map((room) => ({
+      name: room.name,
+      image: room.image,
+      pax: parseInt(removeTrailingChar(room.pax, "+"), 10),
+      price: room.price !== "" ? parseInt(room.price, 10) : null,
+    })),
   };
 };

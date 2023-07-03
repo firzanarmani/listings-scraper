@@ -11,14 +11,15 @@ const openPage = async (browser: Browser, url: string): Promise<Page> => {
   const page = await browser.newPage();
 
   // Block images (to cut down loading time)
-  await page.setRequestInterception(true);
-  page.on("request", (req) => {
-    if (req.resourceType() === "image") {
-      req.abort();
-    } else {
-      req.continue();
-    }
-  });
+  // TODO Temporarily disabled since it's affecting loading of some listings with meetng rooms, like Spaces Works Empire Tower
+  // await page.setRequestInterception(true);
+  // page.on("request", (req) => {
+  //   if (req.resourceType() === "image") {
+  //     req.abort();
+  //   } else {
+  //     req.continue();
+  //   }
+  // });
 
   await page.goto(url, { waitUntil: "load" });
 
@@ -29,7 +30,7 @@ const createLink = (
   provider: ListingsProvider,
   cityCode: string,
   pageIndex: number = 0,
-  perPage: number = 100,
+  perPage: number = 50, // ! 100 may cause a payload thats too big
   radius: number = 100
 ): string => {
   switch (provider) {

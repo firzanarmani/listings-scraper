@@ -3,14 +3,8 @@
 import { COWORKER_RESOURCES } from "../constants";
 import { CompleteSpace } from "../types/coworker";
 import { Brand, Listing, Outlet, Rate } from "../types/staytion";
-import extractBrands from "./extractBrands";
-import {
-  createBrand,
-  createListing,
-  createOutlet,
-  createRate,
-  parseCityCode,
-} from "./utils";
+import { groupBy } from "../utils/group";
+import { JsonifyToFile } from "../utils/writeFile";
 import { createBrand, createListing, createOutlet, createRate } from "./utils";
 
 export const parseCoworkerData = async (
@@ -36,37 +30,70 @@ export const parseCoworkerData = async (
 
       const outletListings: any[] = [];
 
-      if (space.list_pricing.hot_desk) {
+      const hotDeskListings = groupBy(
+        space.memberships.hot_desks,
+        (desk) => desk.capacity
+      );
+      for (const capacity of Object.keys(hotDeskListings)) {
         const listing = await createListing(
           outlet,
-          COWORKER_RESOURCES.hot_desk
+          COWORKER_RESOURCES.hot_desks,
+          parseInt(capacity, 10)
         );
         listings.push(listing);
-        const rate = await createRate(outlet, listing, space, "hot_desk");
+        const rate = await createRate(
+          outlet,
+          listing,
+          space,
+          "hot_desks",
+          parseInt(capacity, 10)
+        );
         rates.push(rate);
 
         outletListings.push({ ...listing, rates: [rate] });
       }
 
-      if (space.list_pricing.dedicated_desk) {
+      const dedicatedDeskListings = groupBy(
+        space.memberships.dedicated_desks,
+        (desk) => desk.capacity
+      );
+      for (const capacity of Object.keys(dedicatedDeskListings)) {
         const listing = await createListing(
           outlet,
-          COWORKER_RESOURCES.dedicated_desk
+          COWORKER_RESOURCES.dedicated_desks,
+          parseInt(capacity, 10)
         );
         listings.push(listing);
-        const rate = await createRate(outlet, listing, space, "dedicated_desk");
+        const rate = await createRate(
+          outlet,
+          listing,
+          space,
+          "dedicated_desks",
+          parseInt(capacity, 10)
+        );
         rates.push(rate);
 
         outletListings.push({ ...listing, rates: [rate] });
       }
 
-      if (space.list_pricing.private_office) {
+      const privateOfficeListings = groupBy(
+        space.memberships.private_offices,
+        (desk) => desk.capacity
+      );
+      for (const capacity of Object.keys(privateOfficeListings)) {
         const listing = await createListing(
           outlet,
-          COWORKER_RESOURCES.private_office
+          COWORKER_RESOURCES.private_offices,
+          parseInt(capacity, 10)
         );
         listings.push(listing);
-        const rate = await createRate(outlet, listing, space, "private_office");
+        const rate = await createRate(
+          outlet,
+          listing,
+          space,
+          "private_offices",
+          parseInt(capacity, 10)
+        );
         rates.push(rate);
 
         outletListings.push({ ...listing, rates: [rate] });
@@ -75,10 +102,17 @@ export const parseCoworkerData = async (
       if (space.list_pricing.meeting_room) {
         const listing = await createListing(
           outlet,
-          COWORKER_RESOURCES.meeting_room
+          meetingRoom.name,
+          meetingRoom.pax
         );
         listings.push(listing);
-        const rate = await createRate(outlet, listing, space, "meeting_room");
+        const rate = await createRate(
+          outlet,
+          listing,
+          space,
+          "meeting_rooms",
+          meetingRoom.pax
+        );
         rates.push(rate);
 
         outletListings.push({ ...listing, rates: [rate] });

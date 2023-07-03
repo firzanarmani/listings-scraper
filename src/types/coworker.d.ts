@@ -4,6 +4,12 @@ export type CompleteSpace = Space & {
     saturday: { open: string; close: string } | null;
     sunday: { open: string; close: string } | null;
   };
+  meetingRooms: {
+    name: string;
+    image: string | undefined;
+    pax: number;
+    price: number | null;
+  }[];
 };
 
 // Generated with QuickType.io

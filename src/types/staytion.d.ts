@@ -62,7 +62,7 @@ export type Listing = {
   available_for_purchase: boolean;
   request_based_booking: boolean;
   auto_cancel_booking_duration: number | null;
-  category_tags: CategoryTag[];
+  category_tags: string[];
 
   enabled: boolean;
 };

@@ -1,5 +1,11 @@
 import { v4 as uuidv4 } from "uuid";
-import { CITIES, COWORKER_AMENITIES, CoworkerResources } from "../constants";
+import {
+  CATEGORY_TAGS,
+  CITIES,
+  COWORKER_AMENITIES,
+  COWORKER_RESOURCES,
+  CoworkerResources,
+} from "../constants";
 import { slugStringDB } from "../utils/slugStringDB";
 import {
   Outlet,
@@ -136,7 +142,7 @@ export const createOutlet = async (
       space.descriptions.find((desc) => desc.language === "English")
         ?.text_full ?? "",
 
-    full_address: `${space.location.address_1}, ${space.location.address_2}`,
+    full_address: `${space.location.address_1.trim()}, ${space.location.address_2.trim()}`,
     city_area_code: null,
     city_code: cityCode,
     country_code: country,
@@ -168,26 +174,41 @@ export const createOutlet = async (
 
 export const createListing = async (
   outlet: Outlet,
-  listingName: string
+  listingName: string,
+  capacity: number
 ): Promise<Listing> => {
   const listingId = uuidv4();
   const listingSlug = await slugStringDB(listingName, "listings", listingId);
+
+  const categoryTags: string[] = [];
+  if (listingName === COWORKER_RESOURCES.hot_desks) {
+    categoryTags.push(CATEGORY_TAGS["Hot Desk"]);
+  } else if (listingName === COWORKER_RESOURCES.dedicated_desks) {
+    categoryTags.push(CATEGORY_TAGS.Others);
+  } else if (listingName === COWORKER_RESOURCES.private_offices) {
+    categoryTags.push(CATEGORY_TAGS.Meeting);
+    categoryTags.push(CATEGORY_TAGS.Others);
+  } else if (listingName === COWORKER_RESOURCES.meeting_rooms) {
+    categoryTags.push(CATEGORY_TAGS.Meeting);
+    categoryTags.push(CATEGORY_TAGS.Meeting);
+  }
+
   return {
     id: listingId,
     slug: listingSlug,
     outlet_id: outlet.id,
 
     name: listingName,
-    description: outlet.description,
+    description: `For ${capacity} pax`,
 
-    opening_hours: null, // No need to override outlet's opening hours
-    amenities: [], // TODO Use outlet info
+    opening_hours: null, // ? No need to override outlet's opening hours, unless 24h instead of operating hours?
+    amenities: outlet.amenities, // ! Uses outlet info
     media: [], // TODO
 
     available_for_purchase: true,
     request_based_booking: true,
     auto_cancel_booking_duration: 5,
-    category_tags: [], // TODO
+    category_tags: categoryTags,
 
     enabled: true,
   };
@@ -198,24 +219,63 @@ export const createRate = async (
   outlet: Outlet,
   listing: Listing,
   space: CompleteSpace,
-  resource: CoworkerResources
+  resource: CoworkerResources,
+  capacity: number
 ): Promise<Rate> => {
   const rateId = uuidv4();
 
+  if (resource === "meeting_rooms") {
+    return {
+      id: rateId,
+      listing_id: listing.id,
+      outlet_id: outlet.id,
+
+      mode: "quote", // ! Yet to find a meeting room with a price
+      price: null,
+      price_per_additional_pax: null,
+      max_pax: null,
+    };
+  }
+
   let price: number | null = null;
   let priceMode: Rate["mode"] = "day";
-  const resourcePrice = space.list_pricing[resource]!;
+  const resourcePrice = space.memberships[resource]!.filter(
+    (desk) => desk.capacity === capacity
+  );
 
-  if (resourcePrice.day) {
-    price = parseInt(resourcePrice.day.price.replace(",", ""), 10);
-  } else if (resource === "hot_desk" && resourcePrice.week) {
-    price = (parseInt(resourcePrice.week.price.replace(",", ""), 10) / 5) * 1.3;
-  } else if (resource === "hot_desk" && resourcePrice.month) {
-    price =
-      (parseInt(resourcePrice.month.price.replace(",", ""), 10) / 5) * 1.3;
-  } else {
-    priceMode = "quote";
-    price = null;
+  /*
+    hotdesk
+    - daily
+    - (weekly/5)+30%
+    - (monthly/20)+30%
+
+    anything else
+    - hourly, daily or get quote
+
+    prices in membership field are already sorted:
+    1 Day price > Multiple Days price > 1 Month price > .. > 1 Year > ...
+    so once we set with the smallest denomination of time qty, we can stop
+   */
+  // eslint-disable-next-line no-restricted-syntax
+  for (const desk of resourcePrice) {
+    if (!price && desk.duration_metric === "day") {
+      price = desk.price / parseInt(desk.duration_qty, 10); // Average daily pricing if duration_qty > 1 day for a given price
+    } else if (
+      !price &&
+      desk.duration_metric === "week" &&
+      resource === "hot_desks"
+    ) {
+      price = (desk.price / parseInt(desk.duration_qty, 10) / 5) * 1.3;
+    } else if (
+      !price &&
+      desk.duration_metric === "month" &&
+      resource === "hot_desks"
+    ) {
+      price = (desk.price / parseInt(desk.duration_qty, 10) / 20) * 1.3;
+    } else if (!price && resource !== "hot_desks") {
+      priceMode = "quote";
+      price = null;
+    }
   }
 
   return {
@@ -224,7 +284,7 @@ export const createRate = async (
     outlet_id: outlet.id,
 
     mode: priceMode,
-    price, // Double check this
+    price,
     price_per_additional_pax: null,
     max_pax: null,
   };

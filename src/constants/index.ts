@@ -140,10 +140,10 @@ export const COWORKER_AMENITIES: Record<string, string> = {
 } as const;
 
 export const COWORKER_RESOURCES: Record<CoworkerResources, string> = {
-  hot_desk: "Hot Desk",
-  dedicated_desk: "Dedicated Desk",
-  private_office: "Private Office",
-  meeting_room: "Meeting Room",
+  hot_desks: "Hot Desk",
+  dedicated_desks: "Dedicated Desk",
+  private_offices: "Private Office",
+  meeting_rooms: "Meeting Room",
 };
 
 export const CATEGORY_TAGS: Record<CategoryTags, string> = {
@@ -161,10 +161,10 @@ export const CATEGORY_TAGS: Record<CategoryTags, string> = {
 };
 
 export type CoworkerResources =
-  | "hot_desk"
-  | "dedicated_desk"
-  | "private_office"
-  | "meeting_room";
+  | "hot_desks"
+  | "dedicated_desks"
+  | "private_offices"
+  | "meeting_rooms";
 
 export type CategoryTags =
   | "Hot Desk"
