@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from "uuid";
 import {
+  AMENITIES,
   CATEGORY_TAGS,
   CITIES,
   COWORKER_AMENITIES,
@@ -205,7 +206,7 @@ export const createListing = async (
     description: `For ${capacity} pax`,
 
     opening_hours: null, // ? No need to override outlet's opening hours, unless 24h instead of operating hours?
-    amenities: outlet.amenities, // ! Uses outlet info
+    amenities: [AMENITIES.WIFI, AMENITIES.AIR_CONDITIONING],
     media: [], // TODO
 
     available_for_purchase: true,
