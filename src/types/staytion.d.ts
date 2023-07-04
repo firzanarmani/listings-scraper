@@ -41,7 +41,7 @@ export type Outlet = {
   default_email: string[];
 
   platform_fee_percentage: number | null;
-  fixed_fee_per_transaction: number | null;
+  fixed_fee_per_transactions: number | null;
   membership_fee_per_transaction: number | null;
 
   enabled: boolean;
@@ -62,6 +62,7 @@ export type Listing = {
   available_for_purchase: boolean;
   request_based_booking: boolean;
   auto_cancel_booking_duration: number | null;
+  default_allotments_per_day: number;
   category_tags: string[];
 
   enabled: boolean;
@@ -73,14 +74,14 @@ export type Rate = {
   outlet_id: string;
 
   mode: "hour" | "day" | "quote";
-  price: number | null;
+  price: number;
   price_per_additional_pax: number | null;
   max_pax: number | null;
 };
 
 export type Location = {
   type: "Point";
-  coordinates: [string, string]; // [lat, lon] SWITCH THIS [lon, lat]
+  coordinates: [number, number]; // [lon, lat]
   crs: {
     type: string;
     properties: {

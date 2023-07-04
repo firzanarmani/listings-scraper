@@ -148,7 +148,10 @@ export const createOutlet = async (
     country_code: country,
     geoloc: {
       type: "Point",
-      coordinates: [space.location.lng, space.location.lat],
+      coordinates: [
+        parseFloat(space.location.lng),
+        parseFloat(space.location.lat),
+      ],
       crs: {
         type: "name",
         properties: { name: "urn:ogc:def:crs:EPSG::4326" },
@@ -165,7 +168,7 @@ export const createOutlet = async (
     default_email: ["alex@gostaytion.com", "enquiry@gostaytion.com"],
 
     platform_fee_percentage: 15,
-    fixed_fee_per_transaction: 0,
+    fixed_fee_per_transactions: 0,
     membership_fee_per_transaction: null, // ? 250?
 
     enabled: true,
@@ -208,6 +211,7 @@ export const createListing = async (
     available_for_purchase: true,
     request_based_booking: true,
     auto_cancel_booking_duration: 5,
+    default_allotments_per_day: 0,
     category_tags: categoryTags,
 
     enabled: true,
@@ -231,13 +235,13 @@ export const createRate = async (
       outlet_id: outlet.id,
 
       mode: "quote", // ! Yet to find a meeting room with a price
-      price: null,
+      price: 0,
       price_per_additional_pax: null,
       max_pax: null,
     };
   }
 
-  let price: number | null = null;
+  let price: number = 0;
   let priceMode: Rate["mode"] = "day";
   const resourcePrice = space.memberships[resource]!.filter(
     (desk) => desk.capacity === capacity
@@ -274,7 +278,7 @@ export const createRate = async (
       price = (desk.price / parseInt(desk.duration_qty, 10) / 20) * 1.3;
     } else if (!price && resource !== "hot_desks") {
       priceMode = "quote";
-      price = null;
+      price = 0;
     }
   }
 
