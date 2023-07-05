@@ -1,32 +1,52 @@
 import { gqlServerClient } from "../helpers/graphqlClient";
 import { StaytionObject } from "../types/staytion";
-import { ADD_BRAND, ADD_LISTING, ADD_OUTLET } from "./queries";
+import { ADD_BRAND, ADD_LISTING, ADD_OUTLET, ADD_RATE } from "./queries";
+import { uploadImage } from "./uploadImage";
 
 export const inject = async (data: StaytionObject): Promise<void> => {
   const { brands, outlets, listings, rates } = data;
 
-  /*
-  Promise.all([
-    ...brands.map((brand) =>
+  await Promise.all(
+    brands.map((brand) =>
       gqlServerClient.request(ADD_BRAND, {
         object: brand,
       })
-    ),
-    ...outlets.map((outlet) =>
+    )
+  );
+
+  const uploadedOutletMedia = await Promise.all(
+    outlets.map((outlet) =>
+      Promise.all(outlet.media.map((media) => uploadImage(media)))
+    )
+  );
+
+  await Promise.all(
+    outlets.map((outlet, index) =>
       gqlServerClient.request(ADD_OUTLET, {
-        object: outlet,
+        object: { ...outlet, media: uploadedOutletMedia[index] },
       })
-    ),
-    ...listings.map((listing) =>
+    )
+  );
+
+  const uploadedListingMedia = await Promise.all(
+    listings.map((listing) =>
+      Promise.all(listing.media.map((media) => uploadImage(media)))
+    )
+  );
+
+  await Promise.all(
+    listings.map((listing, index) =>
       gqlServerClient.request(ADD_LISTING, {
-        object: listing,
+        object: { ...listing, media: uploadedListingMedia[index] },
       })
-    ),
-    ...rates.map((brand) =>
-      gqlServerClient.request(ADD_BRAND, {
+    )
+  );
+
+  await Promise.all(
+    rates.map((brand) =>
+      gqlServerClient.request(ADD_RATE, {
         object: brand,
       })
-    ),
-  ]);
-  */
+    )
+  );
 };

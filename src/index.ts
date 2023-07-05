@@ -7,11 +7,8 @@ const run = async (provider: ListingsProvider, cityCode: string) => {
   try {
     // Scraper - Scrape a website to create data string
     const listings = await scrape(provider, cityCode);
-    // console.log(listings.length);
-
     // Parser - Convert JSON data into properly formatted data object
     const data = await parse(provider, cityCode, listings);
-
     // Injector - Push the data object into database
     await inject(data);
   } catch (err) {

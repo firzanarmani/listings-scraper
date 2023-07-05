@@ -163,7 +163,12 @@ export const createOutlet = async (
 
     opening_hours: parseOperatingHours(space),
     amenities: parseAmenities(space),
-    media: [],
+    media: space.images.map((image) => ({
+      url: image.url_no_params,
+      type: "",
+      public: true,
+      filename: image.url_no_params.replace(/^https:\/\//, ""),
+    })),
 
     customer_support_email: "alex@gostaytion.com",
     default_email: ["alex@gostaytion.com", "enquiry@gostaytion.com"],
@@ -207,7 +212,7 @@ export const createListing = async (
 
     opening_hours: null, // ? No need to override outlet's opening hours, unless 24h instead of operating hours?
     amenities: [AMENITIES.WIFI, AMENITIES.AIR_CONDITIONING],
-    media: [], // TODO
+    media: [outlet.media[0]], // ! Since there are no images for individual listings (that we can match from outlet.media automatically), let's use outlet.media[0]
 
     available_for_purchase: true,
     request_based_booking: true,

@@ -115,6 +115,7 @@ export type Media = {
   type: string;
   public: boolean;
   ref_id?: string | null;
+  filename?: string | null;
 };
 
 export type StaytionObject = {
