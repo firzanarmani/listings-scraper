@@ -89,7 +89,6 @@ const parseOperatingHours = (space: CompleteSpace): OpeningHours => {
 const parseAmenities = (space: CompleteSpace): string[] => {
   const outletAmenities = [];
   if (space.amenities_ids) {
-    // eslint-disable-next-line no-restricted-syntax
     for (const amenity of space.amenities_ids.split(",")) {
       if (COWORKER_AMENITIES[amenity]) {
         outletAmenities.push(COWORKER_AMENITIES[amenity]);
@@ -266,7 +265,6 @@ export const createRate = async (
     1 Day price > Multiple Days price > 1 Month price > .. > 1 Year > ...
     so once we set with the smallest denomination of time qty, we can stop
    */
-  // eslint-disable-next-line no-restricted-syntax
   for (const desk of resourcePrice) {
     if (!price && desk.duration_metric === "day") {
       price = desk.price / parseInt(desk.duration_qty, 10); // Average daily pricing if duration_qty > 1 day for a given price

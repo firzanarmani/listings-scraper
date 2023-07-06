@@ -1,5 +1,3 @@
-/* eslint-disable no-await-in-loop */
-/* eslint-disable no-restricted-syntax */
 import { Browser, launch } from "puppeteer";
 import { createLink } from "./utils";
 import { ListingsProvider } from "../types/constants";
@@ -26,7 +24,6 @@ const scrape = async (provider: ListingsProvider, cityCode: string) => {
 
   const browser = await launch({
     headless: "new",
-    // headless: false,
   });
 
   /* On first run, get the pagination information */

@@ -73,7 +73,6 @@ export const scrapeCoworkerListing = async (
     const meetingRoomElements = document.querySelectorAll<HTMLDivElement>(
       "div#meeting-rooms div.slick-slide:not(.slick-cloned)"
     );
-    // eslint-disable-next-line no-restricted-syntax
     for (const meetingRoom of meetingRoomElements) {
       const name =
         meetingRoom.querySelector<HTMLHeadingElement>("h5")?.innerText ||

@@ -1,10 +1,7 @@
-/* eslint-disable no-restricted-syntax */
-/* eslint-disable no-await-in-loop */
 import { COWORKER_RESOURCES } from "../constants";
 import { CompleteSpace } from "../types/coworker";
 import { Brand, Listing, Outlet, Rate } from "../types/staytion";
 import { groupBy } from "../utils/group";
-import { JsonifyToFile } from "../utils/writeFile";
 import { createBrand, createListing, createOutlet, createRate } from "./utils";
 
 export const parseCoworkerData = async (

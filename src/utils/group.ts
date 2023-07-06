@@ -18,10 +18,8 @@ export const groupDuplicates = (
 ) => {
   let allSpaces = spaces;
   const groupedSpaces = groupBy(allSpaces, (item) => item.name);
-  // eslint-disable-next-line no-restricted-syntax
   for (const [groupName, groupSpaces] of Object.entries(groupedSpaces)) {
     if (groupSpaces.length > 1) {
-      // eslint-disable-next-line no-param-reassign
       listings[groupName] = groupSpaces;
       allSpaces = allSpaces.filter((space) => !groupSpaces.includes(space));
     }
@@ -47,10 +45,8 @@ export const groupSplitCommas = (
     (item) => item.name.split(", ", 2)[0]
   );
 
-  // eslint-disable-next-line no-restricted-syntax
   for (const [groupName, groupSpaces] of Object.entries(groupedSpaces)) {
     if (groupSpaces.length > 1) {
-      // eslint-disable-next-line no-param-reassign
       listings[groupName] = groupSpaces;
       allSpaces = allSpaces.filter((space) => !groupSpaces.includes(space));
     }
@@ -76,10 +72,8 @@ export const groupSplitHyphen = (
     filteredSpaces,
     (item) => item.name.split(" - ", 2)[0]
   );
-  // eslint-disable-next-line no-restricted-syntax
   for (const [groupName, groupSpaces] of Object.entries(groupedSpaces)) {
     if (groupSpaces.length > 1) {
-      // eslint-disable-next-line no-param-reassign
       listings[groupName] = groupSpaces;
       allSpaces = allSpaces.filter((space) => !groupSpaces.includes(space));
     }
@@ -134,7 +128,6 @@ export const groupRest = (
         const items = listings[groupName] || [];
         items.push(currSpace);
 
-        // eslint-disable-next-line no-param-reassign
         listings[groupName] = items;
         console.log(`${groupName} - ${items}`);
         groupRest(spaces.splice(1), listings, groupName);
@@ -153,14 +146,12 @@ const getMaxItem = <T>(arr: T[], fn: (item: T) => any) =>
 export const removeSameLinks = (spaces: CompleteSpace[]) => {
   let allSpaces = spaces;
   const groupedSpaces = groupBy(allSpaces, (item) => item.space_url);
-  // eslint-disable-next-line no-restricted-syntax, @typescript-eslint/naming-convention, @typescript-eslint/no-unused-vars
-  for (const [_groupName, groupSpaces] of Object.entries(groupedSpaces)) {
+  for (const [, groupSpaces] of Object.entries(groupedSpaces)) {
     if (groupSpaces.length > 1) {
       const latestSpace = getMaxItem(groupSpaces, (space) => space.id);
       allSpaces = allSpaces.filter((space) => space.id !== latestSpace.id);
     }
   }
 
-  // eslint-disable-next-line no-param-reassign
   return allSpaces;
 };
