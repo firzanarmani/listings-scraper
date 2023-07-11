@@ -122,5 +122,5 @@ export type StaytionObject = {
   brands: Brand[];
   outlets: Outlet[];
   listings: Listing[];
-  rates: Rates[];
+  rates: Rate[];
 };

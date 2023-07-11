@@ -1,7 +1,11 @@
-import { Browser } from "puppeteer";
-import { CompleteSpace, Space } from "../types/coworker";
-import { openPage } from "./utils";
-import { removeTrailingChar } from "../utils/removeTrailingChar";
+import { Browser, launch } from "puppeteer";
+import { CompleteSpace, Space } from "../../types/coworker";
+import { createLink, fetchJson, openPage } from "../../scraper/utils";
+import { removeTrailingChar } from "../../utils/removeTrailingChar";
+import { parseCityCode } from "../../parser/utils";
+import { AVOID_BRAND_NAMES } from "../../constants";
+import extractBrands from "./extractBrands";
+import chunkArray from "../../utils/chunk";
 
 const convertTimeSimple = (time: string, isAm: boolean) => {
   if (isAm) return time;
@@ -45,7 +49,7 @@ export const scrapeCoworkerListing = async (
   browser: Browser,
   listing: Space
 ): Promise<CompleteSpace> => {
-  const page = await openPage(browser, listing.profile_url_full);
+  const { page } = await openPage(browser, listing.profile_url_full);
 
   // Get operating hours
   const operatingHours = await page.evaluate(() => {
@@ -110,4 +114,69 @@ export const scrapeCoworkerListing = async (
       price: room.price !== "" ? parseInt(room.price, 10) : null,
     })),
   };
+};
+
+export const scrapeCoworker = async (cityCode: string) => {
+  const browser = await launch({
+    // headless: "new",
+    headless: false,
+  });
+
+  // On first run, get pagination information
+  const initialData = await fetchJson(
+    browser,
+    createLink("coworker", cityCode)
+  );
+
+  // Prepare links to scrape using the pagination information
+  const totalNoPages = initialData.pagination.numPages;
+  const links = [];
+  for (
+    let currPageIndex = 1;
+    currPageIndex < totalNoPages;
+    currPageIndex += 1
+  ) {
+    links.push(createLink("coworker", cityCode, currPageIndex));
+  }
+
+  // Push the listings
+  const listings: any[] = [];
+  listings.push(...initialData.spaces);
+  const data = await Promise.all(
+    links.map(async (url) => {
+      const result = await fetchJson(browser, url);
+      return result.spaces;
+    })
+  );
+  listings.push(...data.flat());
+
+  const { city } = parseCityCode(cityCode);
+
+  // Filter results
+  const filteredListings = (listings as Space[])
+    .filter((space) => space.location.city_name.toLowerCase() === city)
+    .filter((space) => {
+      for (const brand of AVOID_BRAND_NAMES) {
+        if (space.name.toLowerCase().startsWith(brand.toLowerCase()))
+          return false;
+      }
+      return true;
+    });
+
+  const newListings: CompleteSpace[] = [];
+
+  const listingsChunks = chunkArray(filteredListings, 20);
+  for (const chunk of listingsChunks) {
+    const updatedChunks = await Promise.all(
+      chunk.map((listing) => scrapeCoworkerListing(browser, listing))
+    );
+
+    newListings.push(...updatedChunks.flat());
+  }
+
+  await browser.close();
+
+  const brandsWithListings = extractBrands(newListings);
+
+  return brandsWithListings;
 };

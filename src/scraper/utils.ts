@@ -3,11 +3,15 @@ import {
   type Page,
   type ElementHandle,
   type NodeFor,
+  HTTPResponse,
 } from "puppeteer";
 import { ListingsProvider } from "../types/constants";
 import { CITIES } from "../constants";
 
-const openPage = async (browser: Browser, url: string): Promise<Page> => {
+export const openPage = async (
+  browser: Browser,
+  url: string
+): Promise<{ page: Page; response: HTTPResponse | null }> => {
   const page = await browser.newPage();
 
   // Block images (to cut down loading time)
@@ -20,12 +24,25 @@ const openPage = async (browser: Browser, url: string): Promise<Page> => {
     }
   });
 
-  await page.goto(url, { waitUntil: "load" });
+  const response = await page.goto(url, { waitUntil: "load" });
 
-  return page;
+  return { page, response };
 };
 
-const createLink = (
+export const fetchJson = async (
+  browser: Browser,
+  url: string
+): Promise<any> => {
+  const { page, response } = await openPage(browser, url);
+
+  const result = await response?.json();
+
+  await page.close();
+
+  return result;
+};
+
+export const createLink = (
   provider: ListingsProvider,
   cityCode: string,
   pageIndex: number = 0,
@@ -43,7 +60,7 @@ const createLink = (
   }
 };
 
-const getItem = async <Selector extends string>(
+export const getItem = async <Selector extends string>(
   page: Page,
   selector: Selector
 ): Promise<ElementHandle<NodeFor<Selector>> | null> => {
@@ -52,12 +69,12 @@ const getItem = async <Selector extends string>(
       visible: true,
       timeout: 1000,
     })
-    .catch((err) => null);
+    .catch(() => null);
 
   return item;
 };
 
-const clickOnItem = async <Selector extends string>(
+export const clickOnItem = async <Selector extends string>(
   page: Page,
   selector: Selector
 ): Promise<void> => {
@@ -66,7 +83,7 @@ const clickOnItem = async <Selector extends string>(
   await item?.click();
 };
 
-const typeInItem = async <Selector extends string>(
+export const typeInItem = async <Selector extends string>(
   page: Page,
   selector: Selector,
   input: string
@@ -76,5 +93,3 @@ const typeInItem = async <Selector extends string>(
   await item?.type(input, { delay: 100 });
   await item?.press("Enter");
 };
-
-export { openPage, createLink, getItem, clickOnItem, typeInItem };

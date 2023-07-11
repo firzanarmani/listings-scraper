@@ -1,6 +1,6 @@
 import { ListingsProvider } from "../types/constants";
 import { StaytionObject } from "../types/staytion";
-import { parseCoworkerData } from "./coworker";
+import { parseCoworkerData } from "../sites/coworker/parser";
 
 const parse = async (
   provider: ListingsProvider,
