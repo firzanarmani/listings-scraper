@@ -16,7 +16,7 @@ import {
   OpeningHours,
   OpeningHourDay,
 } from "../types/staytion";
-import { CompleteSpace } from "../types/coworker";
+import { CompleteSpace } from "../sites/coworker/types";
 
 export const parseCityCode = (
   cityCode: string

@@ -1,5 +1,5 @@
 import { Browser, launch } from "puppeteer";
-import { CompleteSpace, Space } from "../../types/coworker";
+import { CompleteSpace, Space } from "./types";
 import { createLink, fetchJson, openPage } from "../../scraper/utils";
 import { removeTrailingChar } from "../../utils/removeTrailingChar";
 import { parseCityCode } from "../../parser/utils";
@@ -118,8 +118,7 @@ export const scrapeCoworkerListing = async (
 
 export const scrapeCoworker = async (cityCode: string) => {
   const browser = await launch({
-    // headless: "new",
-    headless: false,
+    headless: "new",
   });
 
   // On first run, get pagination information

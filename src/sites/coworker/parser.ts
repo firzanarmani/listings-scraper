@@ -1,5 +1,5 @@
 import { COWORKER_RESOURCES } from "../../constants";
-import { CompleteSpace } from "../../types/coworker";
+import { CompleteSpace } from "./types";
 import { Brand, Listing, Outlet, Rate } from "../../types/staytion";
 import { groupBy } from "../../utils/group";
 import {
