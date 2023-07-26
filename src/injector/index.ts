@@ -1,52 +1,52 @@
 import { gqlServerClient } from "../helpers/graphqlClient";
-import { StaytionObject } from "../types/staytion";
-import { ADD_BRAND, ADD_LISTING, ADD_OUTLET, ADD_RATE } from "./queries";
-import { uploadImage } from "./uploadImage";
+import { Media, StaytionObject } from "../types/staytion";
+import { JsonifyToFile } from "../utils/writeFile";
+import { INJECT_BRAND } from "./queries";
+import { uploadOrGetFromCache } from "./uploadImage";
+import images from "../../images.json";
 
 export const inject = async (data: StaytionObject): Promise<void> => {
-  const { brands, outlets, listings, rates } = data;
+  // Upload photos first
+  // Load images DB
+  const imagesCache = { ...(<{ [url: string]: Media }>images) };
 
+  const updatedData = await Promise.all(
+    data.map(async (brand) => ({
+      ...brand,
+      outlets: {
+        data: await Promise.all(
+          brand.outlets.data.map(async (outlet) => ({
+            ...outlet,
+            media: await Promise.all(
+              outlet.media.map(async (media) =>
+                uploadOrGetFromCache(media, imagesCache)
+              )
+            ),
+            listings: {
+              data: await Promise.all(
+                outlet.listings.data.map(async (listing) => ({
+                  ...listing,
+                  media: await Promise.all(
+                    listing.media.map(async (media) =>
+                      uploadOrGetFromCache(media, imagesCache)
+                    )
+                  ),
+                }))
+              ),
+            },
+          }))
+        ),
+      },
+    }))
+  );
+
+  // Update images DB
+  JsonifyToFile(imagesCache, "images");
+
+  // TODO Chunk object injection
   await Promise.all(
-    brands.map((brand) =>
-      gqlServerClient.request(ADD_BRAND, {
-        object: brand,
-      })
-    )
-  );
-
-  const uploadedOutletMedia = await Promise.all(
-    outlets.map((outlet) =>
-      Promise.all(outlet.media.map((media) => uploadImage(media)))
-    )
-  );
-
-  await Promise.all(
-    outlets.map((outlet, index) =>
-      gqlServerClient.request(ADD_OUTLET, {
-        object: { ...outlet, media: uploadedOutletMedia[index] },
-      })
-    )
-  );
-
-  const uploadedListingMedia = await Promise.all(
-    listings.map((listing) =>
-      Promise.all(listing.media.map((media) => uploadImage(media)))
-    )
-  );
-
-  await Promise.all(
-    listings.map((listing, index) =>
-      gqlServerClient.request(ADD_LISTING, {
-        object: { ...listing, media: uploadedListingMedia[index] },
-      })
-    )
-  );
-
-  await Promise.all(
-    rates.map((brand) =>
-      gqlServerClient.request(ADD_RATE, {
-        object: brand,
-      })
+    updatedData.map((brand) =>
+      gqlServerClient.request(INJECT_BRAND, { object: brand })
     )
   );
 };

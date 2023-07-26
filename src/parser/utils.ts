@@ -99,7 +99,10 @@ const parseAmenities = (space: CompleteSpace): string[] => {
   return outletAmenities;
 };
 
-export const createBrand = async (brandName: string): Promise<Brand> => {
+export const createBrand = async (
+  brandName: string,
+  outlets: Outlet[]
+): Promise<Brand> => {
   const brandId = uuidv4();
 
   const brandSlug = await slugStringDB(brandName, "brands", brandId);
@@ -118,24 +121,26 @@ export const createBrand = async (brandName: string): Promise<Brand> => {
     enabled: false,
     verified: false,
     claimable: true,
+
+    outlets: { data: outlets },
   };
 };
 
 // Currently coworker-specific
 export const createOutlet = async (
-  brand: Brand,
+  brandName: string,
+  listings: Listing[],
   space: CompleteSpace,
   cityCode: string
 ): Promise<Outlet> => {
   const { country } = parseCityCode(cityCode);
 
-  const outletName = `${brand.name} @ ${space.display_name}`;
+  const outletName = `${brandName} @ ${space.display_name}`;
   const outletId = uuidv4();
   const outletSlug = await slugStringDB(outletName, "outlets", outletId);
   return {
     id: outletId,
     slug: outletSlug,
-    brand_id: brand.id,
 
     name: outletName,
     description:
@@ -177,11 +182,14 @@ export const createOutlet = async (
     membership_fee_per_transaction: null, // ? 250?
 
     enabled: true,
+
+    listings: { data: listings },
   };
 };
 
 export const createListing = async (
-  outlet: Outlet,
+  space: CompleteSpace,
+  rates: Rate[],
   listingName: string,
   capacity: number
 ): Promise<Listing> => {
@@ -204,14 +212,20 @@ export const createListing = async (
   return {
     id: listingId,
     slug: listingSlug,
-    outlet_id: outlet.id,
 
     name: listingName,
     description: `For ${capacity} pax`,
 
     opening_hours: null, // ? No need to override outlet's opening hours, unless 24h instead of operating hours?
     amenities: [AMENITIES.WIFI, AMENITIES.AIR_CONDITIONING],
-    media: [outlet.media[0]], // ! Since there are no images for individual listings (that we can match from outlet.media automatically), let's use outlet.media[0]
+    media: [
+      {
+        url: space.images[0].url_no_params,
+        type: "",
+        public: true,
+        filename: space.images[0].url_no_params.replace(/^https:\/\//, ""),
+      },
+    ], // ! Since there are no images for individual listings (that we can match from outlet.media automatically), let's use outlet.media[0]
 
     available_for_purchase: true,
     request_based_booking: true,
@@ -220,13 +234,12 @@ export const createListing = async (
     category_tags: categoryTags,
 
     enabled: true,
+    rates: { data: rates },
   };
 };
 
 // Currently coworker-specific
 export const createRate = async (
-  outlet: Outlet,
-  listing: Listing,
   space: CompleteSpace,
   resource: CoworkerResources,
   capacity: number
@@ -236,8 +249,7 @@ export const createRate = async (
   if (resource === "meeting_rooms") {
     return {
       id: rateId,
-      listing_id: listing.id,
-      outlet_id: outlet.id,
+      outlet_id: "", // Default value, will override later
 
       mode: "quote", // ! Yet to find a meeting room with a price
       price: 0,
@@ -288,8 +300,7 @@ export const createRate = async (
 
   return {
     id: rateId,
-    listing_id: listing.id,
-    outlet_id: outlet.id,
+    outlet_id: "", // Default value, will override later
 
     mode: priceMode,
     price,

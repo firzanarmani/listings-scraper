@@ -7,12 +7,7 @@ const parse = async (
   cityCode: string,
   listings: Record<string, any[]>
 ) => {
-  let parsedStaytionObj: StaytionObject = {
-    brands: [],
-    outlets: [],
-    listings: [],
-    rates: [],
-  };
+  let parsedStaytionObj: StaytionObject = [];
 
   switch (provider) {
     case "coworker":

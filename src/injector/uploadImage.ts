@@ -55,3 +55,26 @@ export const uploadImage = async (image: Media): Promise<Media> => {
     ref_id: fileNameExt,
   };
 };
+
+export const uploadOrGetFromCache = (
+  media: Media,
+  imagesCache: { [url: string]: Media }
+) =>
+  new Promise<Media>((resolve, reject) => {
+    const originalPhotoUrl = media.url;
+
+    // If image has not been uploaded into the link (cached into the local db), upload the image
+    if (!imagesCache[originalPhotoUrl]) {
+      // Then, store the image into the local db
+      uploadImage(media)
+        .then((uploadedImage) => {
+          // eslint-disable-next-line no-param-reassign
+          imagesCache[originalPhotoUrl] = uploadedImage;
+          resolve(imagesCache[originalPhotoUrl]);
+        })
+        .catch((err) => reject(err));
+    } else {
+      // eslint-disable-next-line no-param-reassign
+      resolve(imagesCache[originalPhotoUrl]);
+    }
+  });

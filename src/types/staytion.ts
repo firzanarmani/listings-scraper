@@ -1,5 +1,7 @@
 import { AMENITIES } from "../constants";
 
+export type StaytionObject = Brand[];
+
 export type Brand = {
   id: string;
   slug: string;
@@ -15,12 +17,13 @@ export type Brand = {
   enabled: boolean;
   verified: boolean;
   claimable: boolean;
+
+  outlets: { data: Outlet[] };
 };
 
 export type Outlet = {
   id: string;
   slug: string;
-  brand_id: string;
 
   name: string;
   description: string;
@@ -45,12 +48,13 @@ export type Outlet = {
   membership_fee_per_transaction: number | null;
 
   enabled: boolean;
+
+  listings: { data: Listing[] };
 };
 
 export type Listing = {
   id: string;
   slug: string;
-  outlet_id: string;
 
   name: string;
   description: string;
@@ -66,11 +70,12 @@ export type Listing = {
   category_tags: string[];
 
   enabled: boolean;
+
+  rates: { data: Rate[] };
 };
 
 export type Rate = {
   id: string;
-  listing_id: string;
   outlet_id: string;
 
   mode: "hour" | "day" | "quote";
@@ -116,11 +121,4 @@ export type Media = {
   public: boolean;
   ref_id?: string | null;
   filename?: string | null;
-};
-
-export type StaytionObject = {
-  brands: Brand[];
-  outlets: Outlet[];
-  listings: Listing[];
-  rates: Rate[];
 };

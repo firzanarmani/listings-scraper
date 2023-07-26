@@ -1,6 +1,6 @@
 import { COWORKER_RESOURCES } from "../../constants";
 import { CompleteSpace } from "./types";
-import { Brand, Listing, Outlet, Rate } from "../../types/staytion";
+import { Listing, Outlet, StaytionObject } from "../../types/staytion";
 import { groupBy } from "../../utils/group";
 import {
   createBrand,
@@ -13,12 +13,7 @@ export const parseCoworkerData = async (
   cityCode: string,
   brandsWithListings: Record<string, CompleteSpace[]>
 ) => {
-  const brands: Brand[] = [];
-  const outlets: Outlet[] = [];
-  const listings: Listing[] = [];
-  const rates: Rate[] = [];
-
-  const parsedStaytionObj: any[] = [];
+  const parsedStaytionObj: StaytionObject = [];
 
   // TODO Revert
   for (const brandName of Object.keys(brandsWithListings)) {
@@ -27,38 +22,29 @@ export const parseCoworkerData = async (
     //     name.toLowerCase().startsWith("common") ||
     //     name.toLowerCase().startsWith("comet")
     // )) {
-    const brand = await createBrand(brandName);
-    brands.push(brand);
-
-    const brandOutlets: any[] = [];
+    const brandOutlets: Outlet[] = [];
 
     for (const space of brandsWithListings[brandName]) {
-      const outlet = await createOutlet(brand, space, cityCode);
-      outlets.push(outlet);
-
-      const outletListings: any[] = [];
+      const outletListings: Listing[] = [];
 
       const hotDeskListings = groupBy(
         space.memberships.hot_desks,
         (desk) => desk.capacity
       );
       for (const capacity of Object.keys(hotDeskListings)) {
-        const listing = await createListing(
-          outlet,
-          COWORKER_RESOURCES.hot_desks,
-          parseInt(capacity, 10)
-        );
-        listings.push(listing);
         const rate = await createRate(
-          outlet,
-          listing,
           space,
           "hot_desks",
           parseInt(capacity, 10)
         );
-        rates.push(rate);
+        const listing = await createListing(
+          space,
+          [rate],
+          COWORKER_RESOURCES.hot_desks,
+          parseInt(capacity, 10)
+        );
 
-        outletListings.push({ ...listing, rates: [rate] });
+        outletListings.push(listing);
       }
 
       const dedicatedDeskListings = groupBy(
@@ -66,22 +52,19 @@ export const parseCoworkerData = async (
         (desk) => desk.capacity
       );
       for (const capacity of Object.keys(dedicatedDeskListings)) {
-        const listing = await createListing(
-          outlet,
-          COWORKER_RESOURCES.dedicated_desks,
-          parseInt(capacity, 10)
-        );
-        listings.push(listing);
         const rate = await createRate(
-          outlet,
-          listing,
           space,
           "dedicated_desks",
           parseInt(capacity, 10)
         );
-        rates.push(rate);
+        const listing = await createListing(
+          space,
+          [rate],
+          COWORKER_RESOURCES.dedicated_desks,
+          parseInt(capacity, 10)
+        );
 
-        outletListings.push({ ...listing, rates: [rate] });
+        outletListings.push(listing);
       }
 
       const privateOfficeListings = groupBy(
@@ -89,48 +72,63 @@ export const parseCoworkerData = async (
         (desk) => desk.capacity
       );
       for (const capacity of Object.keys(privateOfficeListings)) {
-        const listing = await createListing(
-          outlet,
-          COWORKER_RESOURCES.private_offices,
-          parseInt(capacity, 10)
-        );
-        listings.push(listing);
         const rate = await createRate(
-          outlet,
-          listing,
           space,
           "private_offices",
           parseInt(capacity, 10)
         );
-        rates.push(rate);
+        const listing = await createListing(
+          space,
+          [rate],
+          COWORKER_RESOURCES.private_offices,
+          parseInt(capacity, 10)
+        );
 
-        outletListings.push({ ...listing, rates: [rate] });
+        outletListings.push(listing);
       }
 
       for (const meetingRoom of space.meetingRooms) {
+        const rate = await createRate(space, "meeting_rooms", meetingRoom.pax);
         const listing = await createListing(
-          outlet,
+          space,
+          [rate],
           meetingRoom.name,
           meetingRoom.pax
         );
-        listings.push(listing);
-        const rate = await createRate(
-          outlet,
-          listing,
-          space,
-          "meeting_rooms",
-          meetingRoom.pax
-        );
-        rates.push(rate);
 
-        outletListings.push({ ...listing, rates: [rate] });
+        outletListings.push(listing);
       }
 
-      brandOutlets.push({ ...outlet, listings: outletListings });
-    }
+      const outlet = await createOutlet(
+        brandName,
+        outletListings,
+          space,
+        cityCode
+        );
 
-    parsedStaytionObj.push({ ...brand, outlets: brandOutlets });
+      brandOutlets.push(outlet);
+      }
+
+    // Modify rates to override outlet_id
+    const updatedOutlets = brandOutlets.map((outlet) => ({
+      ...outlet,
+      listings: {
+        data: outlet.listings.data.map((listing) => ({
+          ...listing,
+          rates: {
+            data: listing.rates.data.map((rate) => ({
+              ...rate,
+              outlet_id: outlet.id,
+            })),
+          },
+        })),
+      },
+    }));
+
+    const brand = await createBrand(brandName, updatedOutlets);
+
+    parsedStaytionObj.push(brand);
   }
 
-  return { brands, outlets, listings, rates };
+  return parsedStaytionObj;
 };

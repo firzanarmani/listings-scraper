@@ -141,11 +141,17 @@ export const scrapeCoworker = async (cityCode: string) => {
   // Push the listings
   const listings: any[] = [];
   listings.push(...initialData.spaces);
+
   const data = await Promise.all(
-    links.map(async (url) => {
-      const result = await fetchJson(browser, url);
-      return result.spaces;
-    })
+    links.map(
+      (url) =>
+        new Promise((resolve, reject) =>
+          // eslint-disable-next-line no-promise-executor-return
+          fetchJson(browser, url)
+            .then((result) => resolve(result.spaces))
+            .catch((err) => reject(err))
+        )
+    )
   );
   listings.push(...data.flat());
 
