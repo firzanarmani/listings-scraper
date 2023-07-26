@@ -1,6 +1,6 @@
 /* eslint-disable no-param-reassign */
 import { toPascalCasePhrase } from "./toPascalCase";
-import { CompleteSpace } from "../types/coworker";
+import { CompleteSpace } from "../sites/coworker/types";
 import { isSimilarStrings } from "./isSimilarStrings";
 
 export const groupBy = <T>(arr: T[], fn: (item: T) => any) =>
