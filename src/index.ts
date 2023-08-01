@@ -1,7 +1,9 @@
+import dotenv from "dotenv";
 import { inject } from "./injector";
 import parse from "./parser";
 import scrape from "./scraper";
 import { ListingsProvider } from "./types/constants";
+dotenv.config();
 
 const run = async (provider: ListingsProvider, cityCode: string) => {
   try {
