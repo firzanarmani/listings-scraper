@@ -4,6 +4,7 @@ import { JsonifyToFile } from "../utils/writeFile";
 import { INJECT_BRAND } from "./queries";
 import { uploadOrGetFromCache } from "./uploadImage";
 import images from "../../images.json";
+import chunkArray from "../utils/chunk";
 
 export const inject = async (data: StaytionObject): Promise<void> => {
   // Upload photos first
@@ -42,10 +43,12 @@ export const inject = async (data: StaytionObject): Promise<void> => {
   // Update images DB
   JsonifyToFile(imagesCache, "images");
 
-  // TODO Chunk object injection
+  const uploadChunks = chunkArray(updatedData, 10);
+  for (const chunk of uploadChunks) {
   await Promise.all(
-    updatedData.map((brand) =>
+      chunk.map((brand) =>
       gqlServerClient.request(INJECT_BRAND, { object: brand })
     )
   );
+  }
 };
