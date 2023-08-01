@@ -55,6 +55,7 @@ export const createBrand = async (
     enabled: false,
     verified: false,
     claimable: true,
+    injected: true,
 
     outlets: { data: outlets },
   };
@@ -113,6 +114,7 @@ export const createOutlet = async (
     membership_fee_per_transaction: null, // ? 250?
 
     enabled: true,
+    injected: true,
 
     listings: { data: listings },
   };
@@ -155,6 +157,7 @@ export const createListing = async (
     default_allotments_per_day: 0,
 
     enabled: true,
+    injected: true,
     rates: { data: rates },
   };
 };

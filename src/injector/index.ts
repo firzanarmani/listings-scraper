@@ -1,5 +1,5 @@
 import { gqlServerClient } from "../helpers/graphqlClient";
-import { Media, StaytionObject } from "../types/staytion";
+import { Listing, Media, Outlet, StaytionObject } from "../types/staytion";
 import { JsonifyToFile } from "../utils/writeFile";
 import { INJECT_BRAND } from "./queries";
 import { uploadOrGetFromCache } from "./uploadImage";
@@ -10,35 +10,34 @@ export const inject = async (data: StaytionObject): Promise<void> => {
   // Load images DB
   const imagesCache = { ...(<{ [url: string]: Media }>images) };
 
-  const updatedData = await Promise.all(
-    data.map(async (brand) => ({
-      ...brand,
-      outlets: {
-        data: await Promise.all(
-          brand.outlets.data.map(async (outlet) => ({
-            ...outlet,
-            media: await Promise.all(
-              outlet.media.map(async (media) =>
-                uploadOrGetFromCache(media, imagesCache)
-              )
-            ),
-            listings: {
-              data: await Promise.all(
-                outlet.listings.data.map(async (listing) => ({
-                  ...listing,
-                  media: await Promise.all(
-                    listing.media.map(async (media) =>
-                      uploadOrGetFromCache(media, imagesCache)
-                    )
-                  ),
-                }))
-              ),
-            },
-          }))
-        ),
-      },
-    }))
-  );
+  const updatedData: StaytionObject = [];
+
+  for (const brand of data) {
+    const updatedOutlets: Outlet[] = [];
+
+    for (const outlet of brand.outlets.data) {
+      const updatedListings: Listing[] = [];
+      const outletImages = await Promise.all(
+        outlet.media.map((media) => uploadOrGetFromCache(media, imagesCache))
+      );
+
+      for (const listing of outlet.listings.data) {
+        const listingImages = await Promise.all(
+          listing.media.map((media) => uploadOrGetFromCache(media, imagesCache))
+        );
+
+        updatedListings.push({ ...listing, media: listingImages });
+      }
+
+      updatedOutlets.push({
+        ...outlet,
+        media: outletImages,
+        listings: { data: updatedListings },
+      });
+    }
+
+    updatedData.push({ ...brand, outlets: { data: updatedOutlets } });
+  }
 
   // Update images DB
   JsonifyToFile(imagesCache, "images");

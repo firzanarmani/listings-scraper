@@ -17,6 +17,7 @@ export type Brand = {
   enabled: boolean;
   verified: boolean;
   claimable: boolean;
+  injected: boolean;
 
   outlets: { data: Outlet[] };
 };
@@ -38,7 +39,7 @@ export type Outlet = {
 
   opening_hours: OpeningHours | null;
   amenities: Amenity[];
-  media: Media[];
+  media: (Media | null)[];
 
   customer_support_email: string;
   default_email: string[];
@@ -48,6 +49,7 @@ export type Outlet = {
   membership_fee_per_transaction: number | null;
 
   enabled: boolean;
+  injected: boolean;
 
   listings: { data: Listing[] };
 };
@@ -61,7 +63,7 @@ export type Listing = {
 
   opening_hours: OpeningHours | null;
   amenities: Amenity[];
-  media: Media[];
+  media: (Media | null)[];
 
   available_for_purchase: boolean;
   request_based_booking: boolean;
@@ -70,6 +72,7 @@ export type Listing = {
   category_tags: string[];
 
   enabled: boolean;
+  injected: boolean;
 
   rates: { data: Rate[] };
 };

@@ -57,10 +57,13 @@ export const uploadImage = async (image: Media): Promise<Media> => {
 };
 
 export const uploadOrGetFromCache = (
-  media: Media,
+  media: Media | null,
   imagesCache: { [url: string]: Media }
 ) =>
-  new Promise<Media>((resolve, reject) => {
+  new Promise<Media | null>((resolve) => {
+    if (media === null) {
+      resolve(null);
+    } else {
     const originalPhotoUrl = media.url;
 
     // If image has not been uploaded into the link (cached into the local db), upload the image
@@ -72,9 +75,13 @@ export const uploadOrGetFromCache = (
           imagesCache[originalPhotoUrl] = uploadedImage;
           resolve(imagesCache[originalPhotoUrl]);
         })
-        .catch((err) => reject(err));
+          .catch((err) => {
+            console.log(`${err} - ${originalPhotoUrl}`);
+            resolve(null);
+          });
     } else {
       // eslint-disable-next-line no-param-reassign
       resolve(imagesCache[originalPhotoUrl]);
+      }
     }
   });
