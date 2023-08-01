@@ -48,8 +48,8 @@ export const createBrand = async (
     description: "", // ? Description is technically not being used at the moment in UI anyway
     website: "", // TODO What kind of website information can we scrape from the listing page on coworker
 
-    platform_fee_percentage: 0,
-    fixed_fee_per_transactions: 0, // ? 10?
+    platform_fee_percentage: 15,
+    fixed_fee_per_transactions: 0,
     membership_fee_per_transaction: null,
 
     enabled: false,
@@ -106,12 +106,12 @@ export const createOutlet = async (
     amenities,
     media,
 
-    customer_support_email: "alex@gostaytion.com",
+    customer_support_email: "enquiry@gostaytion.com",
     default_email: ["alex@gostaytion.com", "enquiry@gostaytion.com"],
 
     platform_fee_percentage: 15,
     fixed_fee_per_transactions: 0,
-    membership_fee_per_transaction: null, // ? 250?
+    membership_fee_per_transaction: 250,
 
     enabled: true,
     injected: true,
