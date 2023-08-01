@@ -26,7 +26,7 @@ export const openPage = async (
     }
   });
 
-  const fetchPromises = [];
+  const fetchPromises: Promise<HTTPResponse | null>[] = [];
 
   if (returnsResponse) {
     fetchPromises.push(
@@ -36,7 +36,7 @@ export const openPage = async (
     );
   }
 
-  fetchPromises.push(page.goto(url, { waitUntil: "load" }));
+  fetchPromises.push(page.goto(url, { waitUntil: "networkidle2" }));
 
   const [response] = await Promise.all(fetchPromises);
 
@@ -52,9 +52,7 @@ export const fetchJson = async (
 
   const result = await response?.json();
 
-  if (response !== null) {
-    await page.close();
-  }
+  await page.close();
 
   return result;
 };

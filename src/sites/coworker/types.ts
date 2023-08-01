@@ -1,3 +1,5 @@
+import { CoworkerResources } from "../../constants";
+
 export type CompleteSpace = Space & {
   operatingHours: {
     weekday: { open: string; close: string } | null;
@@ -261,10 +263,7 @@ export enum MainImage {
 }
 
 export type Memberships = {
-  hot_desks: DedicatedDesk[];
-  dedicated_desks: DedicatedDesk[];
-  private_offices: DedicatedDesk[];
-  virtual_offices: any[] | VirtualOfficesClass;
+  [key in CoworkerResources]: DedicatedDesk[];
 };
 
 export type DedicatedDesk = {

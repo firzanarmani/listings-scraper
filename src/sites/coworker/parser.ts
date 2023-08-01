@@ -1,13 +1,186 @@
-import { COWORKER_RESOURCES } from "../../constants";
+import {
+  AMENITIES,
+  CATEGORY_TAGS,
+  COWORKER_AMENITIES,
+  COWORKER_RESOURCES,
+  CoworkerResources,
+} from "../../constants";
 import { CompleteSpace } from "./types";
-import { Listing, Outlet, StaytionObject } from "../../types/staytion";
+import {
+  Listing,
+  OpeningHourDay,
+  OpeningHours,
+  Outlet,
+  Rate,
+  StaytionObject,
+} from "../../types/staytion";
 import { groupBy } from "../../utils/group";
 import {
   createBrand,
   createListing,
   createOutlet,
   createRate,
+  createSourceMedia,
 } from "../../parser/utils";
+
+const parseOperatingHours = (space: CompleteSpace): OpeningHours => {
+  let weekday: OpeningHourDay = { sets: [], active: false };
+  let saturday: OpeningHourDay = { sets: [], active: false };
+  let sunday: OpeningHourDay = { sets: [], active: false };
+
+  if (space.operatingHours.weekday) {
+    weekday = {
+      sets: [
+        {
+          open: space.operatingHours.weekday.open,
+          close: space.operatingHours.weekday.close,
+        },
+      ],
+      active: true,
+    };
+  }
+
+  if (space.operatingHours.saturday) {
+    saturday = {
+      sets: [
+        {
+          open: space.operatingHours.saturday.open,
+          close: space.operatingHours.saturday.close,
+        },
+      ],
+      active: true,
+    };
+  }
+
+  if (space.operatingHours.sunday) {
+    sunday = {
+      sets: [
+        {
+          open: space.operatingHours.sunday.open,
+          close: space.operatingHours.sunday.close,
+        },
+      ],
+      active: true,
+    };
+  }
+
+  return {
+    monday: weekday,
+    tuesday: weekday,
+    wednesday: weekday,
+    thursday: weekday,
+    friday: weekday,
+    saturday,
+    sunday,
+  };
+};
+
+const parseAmenities = (space: CompleteSpace): string[] => {
+  const outletAmenities = [];
+  if (space.amenities_ids) {
+    for (const amenity of space.amenities_ids.split(",")) {
+      if (COWORKER_AMENITIES[amenity]) {
+        outletAmenities.push(COWORKER_AMENITIES[amenity]);
+      }
+    }
+  }
+
+  return outletAmenities;
+};
+
+export const parseCoworkerListing = (
+  space: CompleteSpace,
+  listingName: string,
+  capacity: number
+) => {
+  const categoryTags: string[] = [];
+  if (listingName === COWORKER_RESOURCES.hot_desks) {
+    categoryTags.push(CATEGORY_TAGS["Hot Desk"]);
+  } else if (listingName === COWORKER_RESOURCES.dedicated_desks) {
+    categoryTags.push(CATEGORY_TAGS.Others);
+  } else if (listingName === COWORKER_RESOURCES.private_offices) {
+    categoryTags.push(CATEGORY_TAGS.Meeting);
+    categoryTags.push(CATEGORY_TAGS.Others);
+  } else if (listingName === COWORKER_RESOURCES.meeting_rooms) {
+    categoryTags.push(CATEGORY_TAGS.Meeting);
+    categoryTags.push(CATEGORY_TAGS.Meeting);
+  }
+
+  return {
+    name: listingName,
+    description: `For ${capacity} pax`,
+
+    amenities: [AMENITIES.WIFI, AMENITIES.AIR_CONDITIONING],
+    categoryTags,
+
+    media: [
+      {
+        url: space.images[0].url_no_params,
+        type: "",
+        public: true,
+        filename: space.images[0].url_no_params.replace(/^https:\/\//, ""),
+      },
+    ], // ! Since there are no images for individual listings (that we can match from outlet.media automatically), let's use outlet.media[0]
+  };
+};
+
+export const parseCoworkerRate = (
+  space: CompleteSpace,
+  resource: CoworkerResources,
+  capacity: number
+): { mode: Rate["mode"]; price: number } => {
+  if (resource === "meeting_rooms") {
+    return {
+      mode: "quote",
+      price: 0,
+    };
+  }
+
+  let price: number = 0;
+  let priceMode: Rate["mode"] = "day";
+  const resourcePrice = space.memberships[resource]!.filter(
+    (desk) => desk.capacity === capacity
+  );
+
+  /*
+    hotdesk
+    - daily
+    - (weekly/5)+30%
+    - (monthly/20)+30%
+
+    anything else
+    - hourly, daily or get quote
+
+    prices in membership field are already sorted:
+    1 Day price > Multiple Days price > 1 Month price > .. > 1 Year > ...
+    so once we set with the smallest denomination of time qty, we can stop
+   */
+  for (const desk of resourcePrice) {
+    if (!price && desk.duration_metric === "day") {
+      price = desk.price / parseInt(desk.duration_qty, 10); // Average daily pricing if duration_qty > 1 day for a given price
+    } else if (
+      !price &&
+      desk.duration_metric === "week" &&
+      resource === "hot_desks"
+    ) {
+      price = (desk.price / parseInt(desk.duration_qty, 10) / 5) * 1.3;
+    } else if (
+      !price &&
+      desk.duration_metric === "month" &&
+      resource === "hot_desks"
+    ) {
+      price = (desk.price / parseInt(desk.duration_qty, 10) / 20) * 1.3;
+    } else if (!price && resource !== "hot_desks") {
+      priceMode = "quote";
+      price = 0;
+    }
+  }
+
+  return {
+    mode: priceMode,
+    price,
+  };
+};
 
 export const parseCoworkerData = async (
   cityCode: string,
@@ -15,99 +188,68 @@ export const parseCoworkerData = async (
 ) => {
   const parsedStaytionObj: StaytionObject = [];
 
-  // TODO Revert
   for (const brandName of Object.keys(brandsWithListings)) {
-    // for (const brandName of Object.keys(brandsWithListings).filter(
-    //   (name) =>
-    //     name.toLowerCase().startsWith("common") ||
-    //     name.toLowerCase().startsWith("comet")
-    // )) {
     const brandOutlets: Outlet[] = [];
 
     for (const space of brandsWithListings[brandName]) {
       const outletListings: Listing[] = [];
 
-      const hotDeskListings = groupBy(
-        space.memberships.hot_desks,
-        (desk) => desk.capacity
-      );
-      for (const capacity of Object.keys(hotDeskListings)) {
-        const rate = await createRate(
-          space,
-          "hot_desks",
-          parseInt(capacity, 10)
-        );
-        const listing = await createListing(
-          space,
-          [rate],
-          COWORKER_RESOURCES.hot_desks,
-          parseInt(capacity, 10)
-        );
+      (
+        Object.keys(COWORKER_RESOURCES) as Array<
+          keyof typeof COWORKER_RESOURCES
+        >
+      ).map(async (resource) => {
+        if (resource === "meeting_rooms") {
+          for (const { name, pax } of space.meetingRooms) {
+            const coworkerRate = parseCoworkerRate(space, "meeting_rooms", pax);
+            const rate = createRate(coworkerRate);
+            const coworkerListing = parseCoworkerListing(space, name, pax);
+            const listing = await createListing(coworkerListing, [rate]);
 
-        outletListings.push(listing);
-      }
+            outletListings.push(listing);
+          }
+        } else {
+          const resourceListings = groupBy(
+            space.memberships[resource],
+            (listing) => listing.capacity
+          );
+          for (const capacity of Object.keys(resourceListings)) {
+            const coworkerRate = parseCoworkerRate(
+              space,
+              resource,
+              parseInt(capacity, 10)
+            );
+            const rate = createRate(coworkerRate);
+            const coworkerListing = parseCoworkerListing(
+              space,
+              resource,
+              parseInt(capacity, 10)
+            );
+            const listing = await createListing(coworkerListing, [rate]);
 
-      const dedicatedDeskListings = groupBy(
-        space.memberships.dedicated_desks,
-        (desk) => desk.capacity
-      );
-      for (const capacity of Object.keys(dedicatedDeskListings)) {
-        const rate = await createRate(
-          space,
-          "dedicated_desks",
-          parseInt(capacity, 10)
-        );
-        const listing = await createListing(
-          space,
-          [rate],
-          COWORKER_RESOURCES.dedicated_desks,
-          parseInt(capacity, 10)
-        );
-
-        outletListings.push(listing);
-      }
-
-      const privateOfficeListings = groupBy(
-        space.memberships.private_offices,
-        (desk) => desk.capacity
-      );
-      for (const capacity of Object.keys(privateOfficeListings)) {
-        const rate = await createRate(
-          space,
-          "private_offices",
-          parseInt(capacity, 10)
-        );
-        const listing = await createListing(
-          space,
-          [rate],
-          COWORKER_RESOURCES.private_offices,
-          parseInt(capacity, 10)
-        );
-
-        outletListings.push(listing);
-      }
-
-      for (const meetingRoom of space.meetingRooms) {
-        const rate = await createRate(space, "meeting_rooms", meetingRoom.pax);
-        const listing = await createListing(
-          space,
-          [rate],
-          meetingRoom.name,
-          meetingRoom.pax
-        );
-
-        outletListings.push(listing);
-      }
+            outletListings.push(listing);
+          }
+        }
+      });
 
       const outlet = await createOutlet(
         brandName,
         outletListings,
-          space,
-        cityCode
-        );
+        cityCode,
+        space.display_name,
+        space.descriptions.find((desc) => desc.language === "English")
+          ?.text_full ?? "",
+        `${space.location.address_1.trim()} ${space.location.address_2.trim()}`,
+        space.location.lng,
+        space.location.lat,
+        space.currency_code,
+        parseOperatingHours(space),
+        parseAmenities(space),
+        space.images.map((image) => createSourceMedia(image.url_no_params))
+      );
 
       brandOutlets.push(outlet);
-      }
+    }
 
     // Modify rates to override outlet_id
     const updatedOutlets = brandOutlets.map((outlet) => ({
