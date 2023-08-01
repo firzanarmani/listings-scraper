@@ -1,7 +1,6 @@
 import { Browser, launch } from "puppeteer";
 import { CompleteSpace, Space } from "./types";
-import { createLink, fetchJson, openPage } from "../../scraper/utils";
-import { removeTrailingChar } from "../../utils/removeTrailingChar";
+import { createLink, fetchJson, getItem, openPage } from "../../scraper/utils";
 import { parseCityCode } from "../../parser/utils";
 import { AVOID_BRAND_NAMES } from "../../constants";
 import extractBrands from "./extractBrands";
@@ -51,74 +50,63 @@ export const scrapeCoworkerListing = async (
 ): Promise<CompleteSpace> => {
   const { page } = await openPage(browser, listing.profile_url_full);
 
-  // Get operating hours
-  const operatingHours = await page.evaluate(() => {
-    const hoursContainer = document.querySelectorAll<HTMLDivElement>(
-      ".space-member-times"
-    );
+  const operatingHoursContainer = await getItem(
+    page,
+    "div.space-members-access-con"
+  );
 
-    let weekday: string | null = null;
-    let saturday: string | null = null;
-    let sunday: string | null = null;
+  if (operatingHoursContainer) {
+    // Get operating hours
+    const operatingHours = await page.evaluate(() => {
+      const hoursContainer = document.querySelectorAll<HTMLDivElement>(
+        "div.space-member-times"
+      );
 
-    if (hoursContainer.length === 3) {
-      weekday = hoursContainer.item(0).textContent;
-      saturday = hoursContainer.item(1).textContent;
-      sunday = hoursContainer.item(2).textContent;
-    }
+      let weekday: string | null = null;
+      let saturday: string | null = null;
+      let sunday: string | null = null;
 
-    return { weekday, saturday, sunday };
-  });
+      if (hoursContainer.length === 3) {
+        weekday = hoursContainer.item(0).textContent;
+        saturday = hoursContainer.item(1).textContent;
+        sunday = hoursContainer.item(2).textContent;
+      }
 
-  // Get meeting rooms
-  const meetingRooms = await page.evaluate(() => {
-    const result = [];
+      return { weekday, saturday, sunday };
+    });
 
-    const meetingRoomElements = document.querySelectorAll<HTMLDivElement>(
-      "div#meeting-rooms div.slick-slide:not(.slick-cloned)"
-    );
-    for (const meetingRoom of meetingRoomElements) {
-      const name =
-        meetingRoom.querySelector<HTMLHeadingElement>("h5")?.innerText ||
-        "Meeting Room";
-      const image = meetingRoom.querySelector<HTMLImageElement>("img")?.src;
-      const pax =
-        meetingRoom
-          .querySelector<HTMLDivElement>(".space-meetingroom-quantity")
-          ?.innerText.split(" ")[0] || "";
-      const price =
-        meetingRoom.querySelector<HTMLDivElement>(".space-meetingroom-price")
-          ?.innerText || "";
+    const extractedHours = {
+      weekday: extractHoursString(operatingHours.weekday),
+      saturday: extractHoursString(operatingHours.saturday),
+      sunday: extractHoursString(operatingHours.sunday),
+    };
 
-      result.push({ name, image, pax, price });
-    }
+    await page.close();
 
-    return result;
-  });
-
-  const extractedHours = {
-    weekday: extractHoursString(operatingHours.weekday),
-    saturday: extractHoursString(operatingHours.saturday),
-    sunday: extractHoursString(operatingHours.sunday),
-  };
+    return {
+      ...listing,
+      operatingHours: extractedHours,
+      meetingRooms: [],
+    };
+  }
 
   await page.close();
 
   return {
     ...listing,
-    operatingHours: extractedHours,
-    meetingRooms: meetingRooms.map((room) => ({
-      name: room.name,
-      image: room.image,
-      pax: parseInt(removeTrailingChar(room.pax, "+"), 10),
-      price: room.price !== "" ? parseInt(room.price, 10) : null,
-    })),
+    operatingHours: {
+      weekday: null,
+      saturday: null,
+      sunday: null,
+    },
+    meetingRooms: [],
   };
 };
 
 export const scrapeCoworker = async (cityCode: string) => {
   const browser = await launch({
-    headless: "new",
+    // headless: "new",
+    headless: false,
   });
 
   // On first run, get pagination information
