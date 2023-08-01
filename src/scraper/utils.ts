@@ -36,7 +36,7 @@ export const openPage = async (
     );
   }
 
-  fetchPromises.push(page.goto(url, { waitUntil: "networkidle2" }));
+  fetchPromises.push(page.goto(url, { waitUntil: "load" }));
 
   const [response] = await Promise.all(fetchPromises);
 
