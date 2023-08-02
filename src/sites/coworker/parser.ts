@@ -222,7 +222,7 @@ export const parseCoworkerData = async (
             const rate = createRate(coworkerRate);
             const coworkerListing = parseCoworkerListing(
               space,
-              resource,
+              COWORKER_RESOURCES[resource],
               parseInt(capacity, 10)
             );
             const listing = await createListing(coworkerListing, [rate]);
