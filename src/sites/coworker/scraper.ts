@@ -1,28 +1,9 @@
-import { Browser, launch } from "puppeteer";
+import { launch } from "puppeteer";
 import { CompleteSpace, Space } from "./types";
-import { createLink, fetchJson, openPage } from "../../scraper/utils";
+import { createLink, fetchJson } from "../../scraper/utils";
 import { parseCityCode } from "../../parser/utils";
 import { AVOID_BRAND_NAMES } from "../../constants";
 import extractBrands from "./extractBrands";
-
-export const scrapeCoworkerListing = async (
-  browser: Browser,
-  listing: Space
-): Promise<CompleteSpace> => {
-  const { page } = await openPage(browser, listing.profile_url_full);
-
-  await page.close();
-
-  return {
-    ...listing,
-    operatingHours: {
-      weekday: null,
-      saturday: null,
-      sunday: null,
-    },
-    meetingRooms: [],
-  };
-};
 
 export const scrapeCoworker = async (cityCode: string) => {
   const browser = await launch({
