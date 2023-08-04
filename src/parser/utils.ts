@@ -1,5 +1,5 @@
 import { v4 as uuidv4 } from "uuid";
-import { CITIES } from "../constants";
+import { AMENITIES, CITIES } from "../constants";
 import { slugStringDB } from "../utils/slugStringDB";
 import {
   Outlet,
@@ -121,7 +121,10 @@ export const createOutlet = async (
     timezone_gmt: CITIES[cityCode].timezone_utc,
 
     opening_hours: openingHours,
-    amenities,
+    amenities:
+      amenities.length === 0
+        ? [AMENITIES.WIFI, AMENITIES.AIR_CONDITIONING]
+        : amenities,
     media,
 
     customer_support_email: "enquiry@gostaytion.com",
