@@ -7,7 +7,7 @@ import {
 } from "puppeteer";
 import { ListingsProvider } from "../types/constants";
 import { CITIES } from "../constants";
-import { parseCityCode } from "../parser/utils";
+// import { parseCityCode } from "../parser/utils";
 
 export const openPage = async (
   browser: Browser,
@@ -64,13 +64,11 @@ export const createLink = (
   perPage: number = 50, // ! 100 may cause a payload thats too big
   radius: number = 100
 ): string => {
-  const { city } = parseCityCode(cityCode);
+  // const { city } = parseCityCode(cityCode);
 
   switch (provider) {
     case "coworker":
       return `https://www.coworker.com/ajax/nearbyspaces?lat=${CITIES[cityCode].latitude}&lon=${CITIES[cityCode].longitude}&rad=${radius}&per_page=${perPage}&page=${pageIndex}`;
-    case "filmplace":
-      return `https://www.filmplace.co/en/search/room?location=${city}&page=${pageIndex}`;
     case "allospaces":
       return "https://app.allospaces.com";
     default:

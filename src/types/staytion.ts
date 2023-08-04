@@ -48,6 +48,10 @@ export type Outlet = {
   fixed_fee_per_transactions: number | null;
   membership_fee_per_transaction: number | null;
 
+  partner_accesses: {
+    data: PartnerAccess[];
+  };
+
   enabled: boolean;
   injected: boolean;
 
@@ -124,4 +128,12 @@ export type Media = {
   public: boolean;
   ref_id?: string | null;
   filename?: string | null;
+};
+
+export type PartnerAccess = {
+  id: string;
+
+  partner_user_uid: string;
+  access_control: string[];
+  email: string;
 };

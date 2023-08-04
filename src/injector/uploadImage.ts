@@ -64,24 +64,25 @@ export const uploadOrGetFromCache = (
     if (media === null) {
       resolve(null);
     } else {
-    const originalPhotoUrl = media.url;
+      const originalPhotoUrl = media.url;
 
-    // If image has not been uploaded into the link (cached into the local db), upload the image
-    if (!imagesCache[originalPhotoUrl]) {
-      // Then, store the image into the local db
-      uploadImage(media)
-        .then((uploadedImage) => {
-          // eslint-disable-next-line no-param-reassign
-          imagesCache[originalPhotoUrl] = uploadedImage;
-          resolve(imagesCache[originalPhotoUrl]);
-        })
+      // If image has not been uploaded into the link (cached into the local db), upload the image
+      if (!imagesCache[originalPhotoUrl]) {
+        // Then, store the image into the local db
+        uploadImage(media)
+          .then((uploadedImage) => {
+            // eslint-disable-next-line no-param-reassign
+            imagesCache[originalPhotoUrl] = uploadedImage;
+            console.log(`${originalPhotoUrl} - Uploaded to S3`);
+            resolve(imagesCache[originalPhotoUrl]);
+          })
           .catch((err) => {
             console.log(`${err} - ${originalPhotoUrl}`);
             resolve(null);
           });
-    } else {
+      } else {
       // eslint-disable-next-line no-param-reassign
-      resolve(imagesCache[originalPhotoUrl]);
+        resolve(imagesCache[originalPhotoUrl]);
       }
     }
   });

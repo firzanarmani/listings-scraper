@@ -184,7 +184,8 @@ export const parseCoworkerRate = (
 
 export const parseCoworkerData = async (
   cityCode: string,
-  brandsWithListings: Record<string, CompleteSpace[]>
+  brandsWithListings: Record<string, CompleteSpace[]>,
+  partner: { uid: string; email: string }
 ) => {
   const parsedStaytionObj: StaytionObject = [];
 
@@ -245,7 +246,8 @@ export const parseCoworkerData = async (
         space.currency_code,
         parseOperatingHours(space),
         parseAmenities(space),
-        space.images.map((image) => createSourceMedia(image.url_no_params))
+        space.images.map((image) => createSourceMedia(image.url_no_params)),
+        { uid: partner.uid, email: partner.email }
       );
 
       brandOutlets.push(outlet);

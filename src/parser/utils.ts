@@ -8,6 +8,7 @@ import {
   Listing,
   Media,
   OpeningHours,
+  PartnerAccess,
 } from "../types/staytion";
 
 export const parseCityCode = (
@@ -61,6 +62,22 @@ export const createBrand = async (
   };
 };
 
+const createPartnerAccess = (
+  partner_uid: string,
+  email: string
+): PartnerAccess => {
+  const partnerAccessId = uuidv4();
+
+  return {
+    id: partnerAccessId,
+
+    partner_user_uid: partner_uid,
+    email,
+
+    access_control: ["all"],
+  };
+};
+
 export const createOutlet = async (
   brandName: string,
   listings: Listing[],
@@ -73,7 +90,8 @@ export const createOutlet = async (
   currencyCode: string,
   openingHours: OpeningHours,
   amenities: string[],
-  media: Media[]
+  media: Media[],
+  partner: { uid: string; email: string }
 ): Promise<Outlet> => {
   const { country } = parseCityCode(cityCode);
 
@@ -117,6 +135,9 @@ export const createOutlet = async (
     injected: true,
 
     listings: { data: listings },
+    partner_accesses: {
+      data: [createPartnerAccess(partner.uid, partner.email)],
+    },
   };
 };
 
