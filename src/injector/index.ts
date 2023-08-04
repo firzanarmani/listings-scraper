@@ -18,9 +18,15 @@ export const inject = async (data: StaytionObject): Promise<void> => {
 
     for (const outlet of brand.outlets.data) {
       const updatedListings: Listing[] = [];
+
       const outletImages = await Promise.all(
         outlet.media.map((media) => uploadOrGetFromCache(media, imagesCache))
       );
+
+      // Skip outlet if no media
+      if (outletImages.filter((image) => image !== null).length === 0) {
+        break;
+      }
 
       for (const listing of outlet.listings.data) {
         const listingImages = await Promise.all(
@@ -37,7 +43,10 @@ export const inject = async (data: StaytionObject): Promise<void> => {
       });
     }
 
+    // Skip brand if no outlets
+    if (updatedOutlets.length > 0) {
     updatedData.push({ ...brand, outlets: { data: updatedOutlets } });
+    }
   }
 
   // Update images DB
