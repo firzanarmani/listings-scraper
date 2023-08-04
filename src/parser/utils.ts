@@ -29,7 +29,7 @@ export const parseCityCode = (
 
 export const createSourceMedia = (url: string): Media => ({
   url,
-  type: "",
+  type: "image/webp",
   public: true,
   filename: url.replace(/^https:\/\//, ""),
 });
