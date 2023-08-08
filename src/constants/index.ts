@@ -1,4 +1,4 @@
-export const AVOID_BRAND_NAMES = ["justco", "regus", "wework"];
+export const AVOID_BRAND_NAMES = ["justco", "regus", "wework", "spaces"];
 
 export const COUNTRIES: Record<string, string> = {
   Singapore: "SGP",
