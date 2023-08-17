@@ -79,6 +79,9 @@ export type Listing = {
   injected: boolean;
 
   rates: { data: Rate[] };
+
+  redirect_url: string | null;
+  redirect_provider: string | null;
 };
 
 export type Rate = {

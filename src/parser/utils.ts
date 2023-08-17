@@ -156,12 +156,16 @@ export const createListing = async (
     amenities,
     media,
     categoryTags,
+    redirect_url,
+    redirect_provider,
   }: {
     name: string;
     description: string;
     amenities: string[];
     media: Media[];
     categoryTags: string[];
+    redirect_url: string | null;
+    redirect_provider: string | null;
   },
   rates: Rate[]
 ): Promise<Listing> => {
@@ -188,6 +192,9 @@ export const createListing = async (
     enabled: true,
     injected: true,
     rates: { data: rates },
+
+    redirect_url,
+    redirect_provider,
   };
 };
 
