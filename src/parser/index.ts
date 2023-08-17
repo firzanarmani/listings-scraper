@@ -1,10 +1,12 @@
 import { ListingsProvider } from "../types/constants";
 import { StaytionObject } from "../types/staytion";
 import { parseCoworkerData } from "../sites/coworker/parser";
+import { parseFilmplaceData } from "../sites/filmplace/parser";
+import { Cities } from "../constants";
 
 const parse = async (
   provider: ListingsProvider,
-  cityCode: string,
+  cityCode: Cities,
   listings: Record<string, any[]>,
   partner: { uid: string; email: string }
 ) => {
@@ -13,6 +15,9 @@ const parse = async (
   switch (provider) {
     case "coworker":
       parsedStaytionObj = await parseCoworkerData(cityCode, listings, partner);
+      break;
+    case "filmplace":
+      parsedStaytionObj = await parseFilmplaceData(cityCode, listings, partner);
       break;
     case "allospaces":
       break;

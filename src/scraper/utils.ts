@@ -6,8 +6,7 @@ import {
   HTTPResponse,
 } from "puppeteer";
 import { ListingsProvider } from "../types/constants";
-import { CITIES } from "../constants";
-// import { parseCityCode } from "../parser/utils";
+import { CITIES, Cities } from "../constants";
 
 export const openPage = async (
   browser: Browser,
@@ -59,7 +58,7 @@ export const fetchJson = async (
 
 export const createLink = (
   provider: ListingsProvider,
-  cityCode: string,
+  cityCode: Cities,
   pageIndex: number = 0,
   perPage: number = 50, // ! 100 may cause a payload thats too big
   radius: number = 100
@@ -71,6 +70,8 @@ export const createLink = (
       return `https://www.coworker.com/ajax/nearbyspaces?lat=${CITIES[cityCode].latitude}&lon=${CITIES[cityCode].longitude}&rad=${radius}&per_page=${perPage}&page=${pageIndex}`;
     case "allospaces":
       return "https://app.allospaces.com";
+    case "filmplace":
+      return `https://www.filmplace.co/en/search/room?location=${CITIES[cityCode].city},${CITIES[cityCode].country}&page=${pageIndex}`;
     default:
       // TODO Handle default case and integration with scrape()
       return "";

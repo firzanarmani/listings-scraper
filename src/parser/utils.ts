@@ -1,5 +1,11 @@
 import { v4 as uuidv4 } from "uuid";
-import { AMENITIES, CITIES } from "../constants";
+import {
+  AMENITIES,
+  CITIES,
+  COUNTRIES,
+  COUNTRY_MEMBERSHIP_FEE,
+  Cities,
+} from "../constants";
 import { slugStringDB } from "../utils/slugStringDB";
 import {
   Outlet,
@@ -12,7 +18,7 @@ import {
 } from "../types/staytion";
 
 export const parseCityCode = (
-  cityCode: string
+  cityCode: Cities
 ): { country: string; city: string } => {
   if (!(cityCode in CITIES)) {
     throw new Error(`${cityCode} not supported by Staytion yet`);
@@ -81,7 +87,7 @@ const createPartnerAccess = (
 export const createOutlet = async (
   brandName: string,
   listings: Listing[],
-  cityCode: string,
+  cityCode: Cities,
   displayName: string,
   description: string,
   fullAddress: string,
@@ -93,8 +99,6 @@ export const createOutlet = async (
   media: Media[],
   partner: { uid: string; email: string }
 ): Promise<Outlet> => {
-  const { country } = parseCityCode(cityCode);
-
   const outletName = `${brandName} @ ${displayName}`;
   const outletId = uuidv4();
   const outletSlug = await slugStringDB(outletName, "outlets", outletId);
@@ -108,7 +112,7 @@ export const createOutlet = async (
     full_address: fullAddress,
     city_area_code: null,
     city_code: cityCode,
-    country_code: country,
+    country_code: COUNTRIES[CITIES[cityCode].country],
     geoloc: {
       type: "Point",
       coordinates: [parseFloat(longitude), parseFloat(latitude)],
@@ -132,7 +136,8 @@ export const createOutlet = async (
 
     platform_fee_percentage: 15,
     fixed_fee_per_transactions: 0,
-    membership_fee_per_transaction: 250,
+    membership_fee_per_transaction:
+      COUNTRY_MEMBERSHIP_FEE[CITIES[cityCode].country],
 
     enabled: true,
     injected: true,
@@ -205,3 +210,19 @@ export const createRate = ({
     max_pax: null,
   };
 };
+
+export const remapRateOutletId = (outlets: Outlet[]) =>
+  outlets.map((outlet) => ({
+    ...outlet,
+    listings: {
+      data: outlet.listings.data.map((listing) => ({
+        ...listing,
+        rates: {
+          data: listing.rates.data.map((rate) => ({
+            ...rate,
+            outlet_id: outlet.id,
+          })),
+        },
+      })),
+    },
+  }));

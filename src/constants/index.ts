@@ -1,40 +1,52 @@
-export const AVOID_BRAND_NAMES = ["justco", "regus", "wework", "spaces"];
+export const AVOID_BRAND_NAMES = ["justco", "regus", "wework"];
 
-export const COUNTRIES: Record<string, string> = {
+export type Countries = "Singapore" | "Malaysia" | "Thailand";
+export const COUNTRIES: Record<Countries, string> = {
   Singapore: "SGP",
   Malaysia: "MYS",
   Thailand: "THA",
 } as const;
 
+export type Cities =
+  | "SGP/singapore"
+  | "MYS/kuala_lumpur"
+  | "MYS/johor_bahru"
+  | "THA/bangkok";
+
 export const CITIES: Record<
-  string,
+  Cities,
   {
-    country: string;
+    city: string;
+    country: Countries;
     latitude: number;
     longitude: number;
     timezone_utc: string;
   }
 > = {
   "SGP/singapore": {
-    country: COUNTRIES.Singapore,
+    city: "Singapore",
+    country: "Singapore",
     latitude: 0,
     longitude: 0,
     timezone_utc: "+0800",
   },
   "MYS/kuala_lumpur": {
-    country: COUNTRIES.Malaysia,
+    city: "Kuala Lumpur",
+    country: "Malaysia",
     latitude: 0,
     longitude: 0,
     timezone_utc: "+0800",
   },
   "MYS/johor_bahru": {
-    country: COUNTRIES.Malaysia,
+    city: "Johor Bahru",
+    country: "Malaysia",
     latitude: 0,
     longitude: 0,
     timezone_utc: "+0800",
   },
   "THA/bangkok": {
-    country: COUNTRIES.Thailand,
+    city: "Bangkok",
+    country: "Thailand",
     latitude: 13.7563309,
     longitude: 100.5017651,
     timezone_utc: "+0700",
@@ -157,7 +169,14 @@ export const CATEGORY_TAGS: Record<CategoryTags, string> = {
   Music: "music",
   Workshop: "workshop",
   Cafe: "cafe",
+  Filming: "filming",
   Others: "others",
+};
+
+export const COUNTRY_MEMBERSHIP_FEE: Record<Countries, number> = {
+  Singapore: 10,
+  Malaysia: 10,
+  Thailand: 250,
 };
 
 export type CoworkerResources =
@@ -177,4 +196,5 @@ export type CategoryTags =
   | "Music"
   | "Workshop"
   | "Cafe"
+  | "Filming"
   | "Others";

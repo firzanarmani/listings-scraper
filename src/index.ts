@@ -3,12 +3,13 @@ import { inject } from "./injector";
 import parse from "./parser";
 import scrape from "./scraper";
 import { ListingsProvider } from "./types/constants";
+import { Cities } from "./constants";
 
 dotenv.config();
 
 const run = async (
   provider: ListingsProvider,
-  cityCode: string,
+  cityCode: Cities,
   partner: { uid: string; email: string }
 ) => {
   try {

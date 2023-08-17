@@ -31,6 +31,7 @@ export const uploadImage = async (image: Media): Promise<Media> => {
   const fileName = uuidv4();
   const fileNameExt = `scrape/${fileName}.webp`;
 
+  // /*
   const metadata = {
     "x-amz-meta-owner-uid": "",
     "x-amz-meta-owner-role": "",
@@ -48,6 +49,7 @@ export const uploadImage = async (image: Media): Promise<Media> => {
   );
 
   if (!data) throw new Error("Unable to upload to S3 bucket");
+  // */
 
   return {
     ...image,
@@ -81,7 +83,6 @@ export const uploadOrGetFromCache = (
             resolve(null);
           });
       } else {
-      // eslint-disable-next-line no-param-reassign
         resolve(imagesCache[originalPhotoUrl]);
       }
     }
