@@ -3,6 +3,7 @@ import {
   CATEGORY_TAGS,
   COWORKER_AMENITIES,
   COWORKER_RESOURCES,
+  Cities,
   CoworkerResources,
 } from "../../constants";
 import { CompleteSpace } from "./types";
@@ -21,6 +22,7 @@ import {
   createOutlet,
   createRate,
   createSourceMedia,
+  remapRateOutletId,
 } from "../../parser/utils";
 
 const parseOperatingHours = (space: CompleteSpace): OpeningHours => {
@@ -183,13 +185,23 @@ export const parseCoworkerRate = (
 };
 
 export const parseCoworkerData = async (
-  cityCode: string,
+  cityCode: Cities,
   brandsWithListings: Record<string, CompleteSpace[]>,
   partner: { uid: string; email: string }
 ) => {
   const parsedStaytionObj: StaytionObject = [];
 
   for (const brandName of Object.keys(brandsWithListings)) {
+    // for (const brandName of Object.keys(brandsWithListings).filter(
+    //   (name) =>
+    //     name.toLowerCase().startsWith("a") ||
+    //     // name.toLowerCase().startsWith("b") ||
+    //     // name.toLowerCase().startsWith("c") ||
+    //     // name.toLowerCase().startsWith("d") ||
+    //     // name.toLowerCase().startsWith("e") ||
+    //     // name.toLowerCase().startsWith("f") ||
+    //     name.toLowerCase().startsWith("g")
+    // )) {
     const brandOutlets: Outlet[] = [];
 
     for (const space of brandsWithListings[brandName]) {
@@ -205,7 +217,14 @@ export const parseCoworkerData = async (
             const coworkerRate = parseCoworkerRate(space, "meeting_rooms", pax);
             const rate = createRate(coworkerRate);
             const coworkerListing = parseCoworkerListing(space, name, pax);
-            const listing = await createListing(coworkerListing, [rate]);
+            const listing = await createListing(
+              {
+                ...coworkerListing,
+                redirect_url: null,
+                redirect_provider: null,
+              },
+              [rate]
+            );
 
             outletListings.push(listing);
           }
@@ -226,7 +245,14 @@ export const parseCoworkerData = async (
               COWORKER_RESOURCES[resource],
               parseInt(capacity, 10)
             );
-            const listing = await createListing(coworkerListing, [rate]);
+            const listing = await createListing(
+              {
+                ...coworkerListing,
+                redirect_url: null,
+                redirect_provider: null,
+              },
+              [rate]
+            );
 
             outletListings.push(listing);
           }
@@ -254,20 +280,7 @@ export const parseCoworkerData = async (
     }
 
     // Modify rates to override outlet_id
-    const updatedOutlets = brandOutlets.map((outlet) => ({
-      ...outlet,
-      listings: {
-        data: outlet.listings.data.map((listing) => ({
-          ...listing,
-          rates: {
-            data: listing.rates.data.map((rate) => ({
-              ...rate,
-              outlet_id: outlet.id,
-            })),
-          },
-        })),
-      },
-    }));
+    const updatedOutlets = remapRateOutletId(brandOutlets);
 
     const brand = await createBrand(brandName, updatedOutlets);
 

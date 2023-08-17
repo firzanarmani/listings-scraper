@@ -2,10 +2,10 @@ import { launch } from "puppeteer";
 import { CompleteSpace, Space } from "./types";
 import { createLink, fetchJson } from "../../scraper/utils";
 import { parseCityCode } from "../../parser/utils";
-import { AVOID_BRAND_NAMES } from "../../constants";
+import { AVOID_BRAND_NAMES, Cities } from "../../constants";
 import extractBrands from "./extractBrands";
 
-export const scrapeCoworker = async (cityCode: string) => {
+export const scrapeCoworker = async (cityCode: Cities) => {
   const browser = await launch({
     headless: "new",
   });
