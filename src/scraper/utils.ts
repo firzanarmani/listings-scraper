@@ -5,8 +5,7 @@ import {
   type NodeFor,
   HTTPResponse,
 } from "puppeteer";
-import { ListingsProvider } from "../types/constants";
-import { CITIES, Cities } from "../constants";
+import { CITIES, type Cities, ListingsProvider } from "../constants";
 
 export const openPage = async (
   browser: Browser,
@@ -35,7 +34,7 @@ export const openPage = async (
     );
   }
 
-  fetchPromises.push(page.goto(url, { waitUntil: "load" }));
+  fetchPromises.push(page.goto(url, { waitUntil: "networkidle2" }));
 
   const [response] = await Promise.all(fetchPromises);
 
@@ -66,11 +65,11 @@ export const createLink = (
   // const { city } = parseCityCode(cityCode);
 
   switch (provider) {
-    case "coworker":
+    case "Coworker":
       return `https://www.coworker.com/ajax/nearbyspaces?lat=${CITIES[cityCode].latitude}&lon=${CITIES[cityCode].longitude}&rad=${radius}&per_page=${perPage}&page=${pageIndex}`;
-    case "allospaces":
+    case "Allospaces":
       return "https://app.allospaces.com";
-    case "filmplace":
+    case "Filmplace":
       return `https://www.filmplace.co/en/search/room?location=${CITIES[cityCode].city},${CITIES[cityCode].country}&page=${pageIndex}`;
     default:
       // TODO Handle default case and integration with scrape()

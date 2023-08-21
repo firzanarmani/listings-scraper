@@ -26,6 +26,8 @@ export type Outlet = {
   id: string;
   slug: string;
 
+  brand_id?: string;
+
   name: string;
   description: string;
 

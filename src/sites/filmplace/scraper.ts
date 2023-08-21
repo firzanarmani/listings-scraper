@@ -4,7 +4,8 @@ import { Page } from "puppeteer";
 import { createLink, fetchJson, openPage } from "../../scraper/utils";
 import { CompleteDatum, Datum, Filmplace } from "./types";
 import chunkArray from "../../utils/chunk";
-import { Cities } from "../../constants";
+import { JsonifyToFile } from "../../utils/writeFile";
+import { CITIES, COUNTRY_CURRENCY, Cities, Currencies } from "../../constants";
 
 export const scrapeFilmplaceListing = async (page: Page) => {
   const details = await page.evaluate(() => {
@@ -94,6 +95,34 @@ export const scrapeFilmplaceListing = async (page: Page) => {
   return details;
 };
 
+export const setFilmplaceCurrency = async (
+  page: Page,
+  cityCode: Cities,
+  returnsResponse: string
+) => {
+  const cityCurrency = COUNTRY_CURRENCY[CITIES[cityCode].country];
+  console.log(cityCurrency.toString());
+
+  const [response] = await Promise.all([
+    page.waitForResponse((currentResponse) =>
+      currentResponse.url().startsWith(returnsResponse)
+    ),
+    page.evaluate((curr: Currencies) => {
+      const currencyElement = Array.from(
+        document.querySelectorAll<HTMLSpanElement>(
+          "div.currency-list span.text-muted.d-block"
+        )
+      ).find((currencyObject) =>
+        currencyObject.textContent?.includes(curr.toString())
+      );
+
+      currencyElement?.click();
+    }, cityCurrency),
+  ]);
+
+  return response;
+};
+
 export const scrapeFilmplace = async (cityCode: Cities) => {
   const browser = await puppeteer.use(StealthPlugin()).launch({
     headless: false,
@@ -103,7 +132,7 @@ export const scrapeFilmplace = async (cityCode: Cities) => {
   // On first run, get pagination information
   const initialData = (await fetchJson(
     browser,
-    createLink("filmplace", cityCode),
+    createLink("Filmplace", cityCode),
     "https://www.filmplace.co/en/room-search-results"
   )) as Filmplace;
 
@@ -115,7 +144,7 @@ export const scrapeFilmplace = async (cityCode: Cities) => {
     currPageIndex <= totalNoPages;
     currPageIndex += 1
   ) {
-    links.push(createLink("filmplace", cityCode, currPageIndex));
+    links.push(createLink("Filmplace", cityCode, currPageIndex));
   }
 
   // Scrape ALL spaces, since we might add non-pro places in the future
@@ -123,15 +152,40 @@ export const scrapeFilmplace = async (cityCode: Cities) => {
   const linksChunks = chunkArray(links);
   for (const chunk of linksChunks) {
     const linksResults = await Promise.all(
-      chunk.map(async (url) => {
-        const result = await fetchJson(
-          browser,
-          url,
-          "https://www.filmplace.co/en/room-search-results"
-        );
+      chunk.map(
+        (url) =>
+          // eslint-disable-next-line no-async-promise-executor
+          new Promise(async (resolve, reject) => {
+            try {
+              const { page } = await openPage(browser, url);
 
-        return result.data;
-      })
+              await setFilmplaceCurrency(
+                page,
+                cityCode,
+                "https://www.filmplace.co/en/room-search-results"
+              );
+
+              const [newResponse] = await Promise.all([
+                page.waitForResponse((response) =>
+                  response
+                    .url()
+                    .startsWith(
+                      "https://www.filmplace.co/en/room-search-results"
+                    )
+                ),
+                page.goto(url, { waitUntil: "load" }),
+              ]);
+
+              const result = await newResponse?.json();
+
+              await page.close();
+
+              resolve(result.data);
+            } catch (err) {
+              reject(err);
+            }
+          })
+      )
     );
     spaces.push(...linksResults.flat());
   }

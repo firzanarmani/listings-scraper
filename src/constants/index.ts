@@ -1,17 +1,50 @@
+export type ListingsProvider = "Coworker" | "Allospaces" | "Filmplace";
+
 export const AVOID_BRAND_NAMES = ["justco", "regus", "wework"];
 
-export type Countries = "Singapore" | "Malaysia" | "Thailand";
+export type Countries =
+  | "Singapore"
+  | "Malaysia"
+  | "Thailand"
+  | "Indonesia"
+  | "Philippines"
+  | "South Korea";
+
 export const COUNTRIES: Record<Countries, string> = {
   Singapore: "SGP",
   Malaysia: "MYS",
   Thailand: "THA",
+  Indonesia: "IDN",
+  Philippines: "PHL",
+  "South Korea": "KOR",
 } as const;
+
+export const COUNTRY_CURRENCY: Record<Countries, Currencies> = {
+  Singapore: "SGD",
+  Malaysia: "MYR",
+  Thailand: "THB",
+  Indonesia: "IDR",
+  Philippines: "PHP",
+  "South Korea": "KRW",
+};
 
 export type Cities =
   | "SGP/singapore"
   | "MYS/kuala_lumpur"
   | "MYS/johor_bahru"
-  | "THA/bangkok";
+  | "THA/bangkok"
+  | "IDN/jakarta"
+  | "IDN/surabaya"
+  | "IDN/bandung"
+  | "IDN/bali"
+  | "PHL/manila_city"
+  | "PHL/taguig"
+  | "PHL/makati"
+  | "PHL/quezon_city"
+  | "PHL/san_pedro_laguna"
+  | "KOR/seoul"
+  | "KOR/daejeon"
+  | "MYS/perak";
 
 export const CITIES: Record<
   Cities,
@@ -51,7 +84,104 @@ export const CITIES: Record<
     longitude: 100.5017651,
     timezone_utc: "+0700",
   },
+  // TODO Indonesia - fix coords
+  "IDN/jakarta": {
+    city: "Jakarta",
+    country: "Indonesia",
+    latitude: 13.7563309,
+    longitude: 100.5017651,
+    timezone_utc: "+0700",
+  },
+  "IDN/surabaya": {
+    city: "Surabaya",
+    country: "Indonesia",
+    latitude: 13.7563309,
+    longitude: 100.5017651,
+    timezone_utc: "+0700",
+  },
+  "IDN/bali": {
+    city: "Bali",
+    country: "Indonesia",
+    latitude: 13.7563309,
+    longitude: 100.5017651,
+    timezone_utc: "+0700",
+  },
+  "IDN/bandung": {
+    city: "Bandung",
+    country: "Indonesia",
+    latitude: 13.7563309,
+    longitude: 100.5017651,
+    timezone_utc: "+0700",
+  },
+  "PHL/manila_city": {
+    city: "Manila City",
+    country: "Philippines",
+    latitude: 13.7563309,
+    longitude: 100.5017651,
+    timezone_utc: "+0700",
+  },
+  "PHL/quezon_city": {
+    city: "Quezon City",
+    country: "Philippines",
+    latitude: 13.7563309,
+    longitude: 100.5017651,
+    timezone_utc: "+0700",
+  },
+  "PHL/makati": {
+    city: "Makati",
+    country: "Philippines",
+    latitude: 13.7563309,
+    longitude: 100.5017651,
+    timezone_utc: "+0700",
+  },
+  "PHL/san_pedro_laguna": {
+    city: "San Pedro Laguna",
+    country: "Philippines",
+    latitude: 13.7563309,
+    longitude: 100.5017651,
+    timezone_utc: "+0700",
+  },
+  "PHL/taguig": {
+    city: "Taguig",
+    country: "Philippines",
+    latitude: 13.7563309,
+    longitude: 100.5017651,
+    timezone_utc: "+0700",
+  },
+  "KOR/seoul": {
+    city: "Seoul",
+    country: "South Korea",
+    latitude: 0,
+    longitude: 0,
+    timezone_utc: "+0900",
+  },
+  "KOR/daejeon": {
+    city: "Daejeon",
+    country: "South Korea",
+    latitude: 0,
+    longitude: 0,
+    timezone_utc: "+0900",
+  },
+  "MYS/perak": {
+    city: "Perak",
+    country: "Malaysia",
+    latitude: 0,
+    longitude: 0,
+    timezone_utc: "+0800",
+  },
 } as const;
+
+export type Currencies =
+  | "HKD"
+  | "THB"
+  | "MYR"
+  | "AUD"
+  | "USD"
+  | "JPY"
+  | "SGD"
+  | "KRW"
+  | "PHP"
+  | "IDR";
 
 export const CURRENCIES: Record<string, string> = {
   HKD: "HKD",
@@ -61,6 +191,8 @@ export const CURRENCIES: Record<string, string> = {
   USD: "USD",
   JPY: "JPY",
   SGD: "SGD",
+  KRW: "KRW",
+  IDR: "IDR",
 };
 
 export const AMENITIES: Record<string, string> = {
@@ -177,6 +309,9 @@ export const COUNTRY_MEMBERSHIP_FEE: Record<Countries, number> = {
   Singapore: 10,
   Malaysia: 10,
   Thailand: 250,
+  Indonesia: 56714,
+  Philippines: 0, // TODO
+  "South Korea": 9862,
 };
 
 export type CoworkerResources =

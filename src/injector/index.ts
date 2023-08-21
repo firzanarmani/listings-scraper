@@ -1,12 +1,16 @@
 import { gqlServerClient } from "../helpers/graphqlClient";
 import { Listing, Media, Outlet, StaytionObject } from "../types/staytion";
 import { JsonifyToFile } from "../utils/writeFile";
-import { INJECT_BRAND } from "./queries";
+import { GET_BRAND, INJECT_BRAND, INJECT_OUTLETS } from "../queries";
 import { uploadOrGetFromCache } from "./uploadImage";
 import images from "../../images.json";
 import chunkArray from "../utils/chunk";
+import { ListingsProvider } from "../constants";
 
-export const inject = async (data: StaytionObject): Promise<void> => {
+export const inject = async (
+  data: StaytionObject,
+  provider: ListingsProvider
+): Promise<void> => {
   // Upload photos first
   // Load images DB
   const imagesCache = { ...(<{ [url: string]: Media }>images) };
@@ -45,19 +49,66 @@ export const inject = async (data: StaytionObject): Promise<void> => {
 
     // Skip brand if no outlets
     if (updatedOutlets.length > 0) {
-    updatedData.push({ ...brand, outlets: { data: updatedOutlets } });
+      updatedData.push({ ...brand, outlets: { data: updatedOutlets } });
     }
   }
 
   // Update images DB
   JsonifyToFile(imagesCache, "images");
 
-  const uploadChunks = chunkArray(updatedData, 10);
-  for (const chunk of uploadChunks) {
-  await Promise.all(
-      chunk.map((brand) =>
-      gqlServerClient.request(INJECT_BRAND, { object: brand })
-    )
-  );
+  JsonifyToFile(updatedData, "test");
+
+  console.log(updatedData.length);
+
+  // If provider is Filmplace, check if Filmplace exists on the server,
+  // If yes, then add just add on to the existing brand
+  if (provider === "Filmplace") {
+    const existingBrands = await gqlServerClient.request<
+      { brands: { id: string }[] },
+      { brandName: String }
+    >(GET_BRAND, { brandName: "Filmplace" });
+
+    console.log(existingBrands);
+
+    if (updatedData.length > 1 || updatedData[0].name !== "Filmplace") {
+      throw Error("Invalid Filmplace object");
+    }
+
+    if (existingBrands.brands.length > 1) {
+      throw Error("More than one Filmplace brand in database");
+    }
+
+    if (existingBrands.brands.length === 0) {
+      const uploadChunks = chunkArray(updatedData, 10);
+      for (const chunk of uploadChunks) {
+        await Promise.all(
+          chunk.map((brand) =>
+            gqlServerClient.request(INJECT_BRAND, { object: brand })
+          )
+        );
+      }
+    } else {
+      const updatedOutlets: Outlet[] = updatedData[0].outlets.data.map(
+        (outlet) => ({
+          ...outlet,
+          brand_id: existingBrands.brands[0].id,
+        })
+      );
+      const uploadChunks = chunkArray(updatedOutlets, 10);
+      await Promise.all(
+        uploadChunks.map((outlets) =>
+          gqlServerClient.request(INJECT_OUTLETS, { objects: outlets })
+        )
+      );
+    }
+  } else {
+    const uploadChunks = chunkArray(updatedData, 10);
+    for (const chunk of uploadChunks) {
+      await Promise.all(
+        chunk.map((brand) =>
+          gqlServerClient.request(INJECT_BRAND, { object: brand })
+        )
+      );
+    }
   }
 };

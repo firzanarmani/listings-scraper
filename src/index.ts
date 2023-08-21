@@ -2,8 +2,7 @@ import dotenv from "dotenv";
 import { inject } from "./injector";
 import parse from "./parser";
 import scrape from "./scraper";
-import { ListingsProvider } from "./types/constants";
-import { Cities } from "./constants";
+import { Cities, ListingsProvider } from "./constants";
 
 dotenv.config();
 
@@ -18,14 +17,14 @@ const run = async (
     // Parser - Convert JSON data into properly formatted data object
     const data = await parse(provider, cityCode, listings, partner);
     // Injector - Push the data object into database
-    await inject(data);
+    await inject(data, provider);
   } catch (err) {
     console.log(err);
   }
 };
 
 // Should be a valid city_code
-run("coworker", "THA/bangkok", {
+run("Filmplace", "KOR/daejeon", {
   uid: "or1ZZ77kyPWQ9eBeYEnY2dJPS4A2",
   email: "alex@gostaytion.com",
 });

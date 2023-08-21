@@ -13,7 +13,7 @@ export const scrapeCoworker = async (cityCode: Cities) => {
   // On first run, get pagination information
   const initialData = await fetchJson(
     browser,
-    createLink("coworker", cityCode)
+    createLink("Coworker", cityCode)
   );
 
   // Prepare links to scrape using the pagination information
@@ -24,7 +24,7 @@ export const scrapeCoworker = async (cityCode: Cities) => {
     currPageIndex < totalNoPages;
     currPageIndex += 1
   ) {
-    links.push(createLink("coworker", cityCode, currPageIndex));
+    links.push(createLink("Coworker", cityCode, currPageIndex));
   }
 
   // Push the listings

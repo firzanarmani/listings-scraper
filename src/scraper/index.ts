@@ -1,19 +1,18 @@
-import { ListingsProvider } from "../types/constants";
+import { Cities, ListingsProvider } from "../constants";
 import { scrapeCoworker } from "../sites/coworker/scraper";
 import { scrapeFilmplace } from "../sites/filmplace/scraper";
-import { Cities } from "../constants";
 
 const scrape = async (provider: ListingsProvider, cityCode: Cities) => {
   let data: Record<string, any[]> = {};
 
   switch (provider) {
-    case "coworker":
+    case "Coworker":
       data = await scrapeCoworker(cityCode);
       break;
-    case "filmplace":
+    case "Filmplace":
       data = await scrapeFilmplace(cityCode);
       break;
-    case "allospaces":
+    case "Allospaces":
       break;
     default:
       break;

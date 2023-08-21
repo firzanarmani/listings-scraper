@@ -1,4 +1,10 @@
-import { AMENITIES, CATEGORY_TAGS, CITIES, Cities } from "../../constants";
+import {
+  AMENITIES,
+  CATEGORY_TAGS,
+  CITIES,
+  COUNTRY_CURRENCY,
+  Cities,
+} from "../../constants";
 import {
   createBrand,
   createListing,
@@ -63,7 +69,7 @@ export const parseFilmplaceData = async (
           amenities: [AMENITIES.WIFI, AMENITIES.AIR_CONDITIONING], // TODO Need to scrape
           categoryTags: [CATEGORY_TAGS.Filming],
           media: [createSourceMedia(space.image_src)],
-          redirect_url: `${space.url}/?ref=staytion`,
+          redirect_url: `${space.url}?ref=staytion`,
           redirect_provider: "Filmplace",
         },
         [hourRate, quoteRate]
@@ -75,10 +81,10 @@ export const parseFilmplaceData = async (
         cityCode,
         space.name,
         formatFilmplaceDescription(space.description),
-        `${CITIES[cityCode].city}, ${CITIES[cityCode].country}`,
+        `${space.city}, ${space.state}, ${space.country_name}`,
         space.longitude,
         space.latitude,
-        space.currency_code,
+        COUNTRY_CURRENCY[CITIES[cityCode].country],
         {
           monday: {
             active: true,
