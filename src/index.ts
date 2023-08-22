@@ -24,7 +24,9 @@ const run = async (
 };
 
 // Should be a valid city_code
-run("Filmplace", "KOR/daejeon", {
-  uid: "or1ZZ77kyPWQ9eBeYEnY2dJPS4A2",
-  email: "alex@gostaytion.com",
-});
+// run("Filmplace", "KOR/daejeon", {
+//   uid: "or1ZZ77kyPWQ9eBeYEnY2dJPS4A2",
+//   email: "alex@gostaytion.com",
+// });
+
+updateRedirectUrl("world");
